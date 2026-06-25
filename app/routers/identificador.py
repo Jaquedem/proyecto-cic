@@ -9,8 +9,21 @@ import numpy as np
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
-CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "coleccion_juegos.csv")
+CSV_PATH   = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "coleccion_juegos.csv")
 MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "modelo_cv")
+
+# Mapeo de nombre de carpeta del dataset → nombre exacto en el CSV
+LABEL_TO_NOMBRE = {
+    "deep_dreams":       "Deep Dreams",
+    "deep_sea":          "Deep Sea",
+    "exploding_kittens": "Exploding kittens",
+    "fantasma_blitz":    "Fantasma blitz",
+    "reyes_dela_rosca":  "Reyes de la Rosca",
+    "spotit_clasico":    "Spot it! Classic",
+    "taco_gato_cabra":   "Taco Gato Cabra Queso Pizza",
+    "unstable_unicorns": "Unstable unicorns",
+    "virus":             "Virus",
+}
 
 _modelo = None
 _etiquetas = None
@@ -35,7 +48,9 @@ def cargar_modelo():
 
 def get_info_juego(nombre: str) -> dict | None:
     df = pd.read_csv(CSV_PATH)
-    fila = df[df["Nombre del juego"].str.lower() == nombre.lower()]
+    # Resolver el nombre del CSV a partir del label del modelo
+    nombre_csv = LABEL_TO_NOMBRE.get(nombre, nombre.replace("_", " "))
+    fila = df[df["Nombre del juego"].str.lower() == nombre_csv.lower()]
     if fila.empty:
         return None
     row = fila.iloc[0]
