@@ -80,6 +80,7 @@ def entrenar():
 
     try:
         import torch
+        from PIL import Image
         from torchvision import transforms
         from transformers import AutoImageProcessor, AutoModelForImageClassification, TrainingArguments, Trainer
         import numpy as np
