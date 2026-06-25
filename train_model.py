@@ -56,7 +56,7 @@ def verificar_dataset():
 def entrenar():
     try:
         import torch
-        from transformers import AutoFeatureExtractor, AutoModelForImageClassification, TrainingArguments, Trainer
+        from transformers import AutoImageProcessor, AutoModelForImageClassification, TrainingArguments, Trainer
         from datasets import Dataset
         from PIL import Image
         import numpy as np
@@ -73,8 +73,8 @@ def entrenar():
     label2id = {label: i for i, label in enumerate(etiquetas)}
     id2label = {i: label for i, label in enumerate(etiquetas)}
 
-    print(f"\n📥 Cargando extractor de características ({MODEL_BASE})...")
-    extractor = AutoFeatureExtractor.from_pretrained(MODEL_BASE)
+    print(f"\n📥 Cargando procesador de imágenes ({MODEL_BASE})...")
+    extractor = AutoImageProcessor.from_pretrained(MODEL_BASE)
 
     # Carga de imágenes
     print("🖼️  Cargando imágenes...")
