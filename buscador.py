@@ -51,9 +51,12 @@ class BuscadorLudoteca:
                 "Nombre": fila["Nombre del juego"],
                 "Complejidad": fila["Nivel de complejidad"],
                 "Premisa": fila["Premisa del juego"],
-                "Min": fila["min jugadores"],
-                "Max": fila["max jugadores"],
-                "Similitud": f"{score.item():.2f}"
+                "Min": int(fila["min jugadores"]),
+                "Max": int(fila["max jugadores"]),
+                "Tiempo": int(fila["Tiempo de juego (min)"]),
+                "Foto": fila.get("foto", ""),
+                "Youtube": fila.get("youtube", ""),
+                "Similitud": f"{score.item():.2f}",
             })
             
         return resultados

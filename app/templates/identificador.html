@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+{% block title %}¿Cómo se juega? — Bombunny{% endblock %}
+
+{% block head_extra %}
+<style>
+  .id-header {
+    text-align: center;
+    padding: 36px 0 20px;
+  }
+
+  .id-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+    padding-bottom: 40px;
+  }
+
+  /* ---- Panel cámara ---- */
+  .camera-panel {
+    background: rgba(255,255,255,0.92);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--sombra);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .camera-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #1a0e30;
+    aspect-ratio: 4/3;
+  }
+
+  #video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 14px;
+  }
+
+  #canvas-capture {
+    display: none;
+  }
+
+  .camera-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 14px;
+  }
+
+  .scan-frame {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -60%);
+    width: 65%;
+    aspect-ratio: 3/4;
+    border: 3px solid rgba(184,157,224,0.7);
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.25);
+  }
+
+  .scan-frame.detected {
+    border-color: #4cde98;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.3), 0 0 20px rgba(76,222,152,0.4);
+    animation: pulse-green 0.5s ease;
+  }
+
+  @keyframes pulse-green {
+    from { box-shadow: 0 0 0 9999px rgba(0,0,0,0.3), 0 0 40px rgba(76,222,152,0.8); }
+    to   { box-shadow: 0 0 0 9999px rgba(0,0,0,0.3), 0 0 20px rgba(76,222,152,0.4); }
+  }
+
+  .prediction-badge {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--texto-oscuro);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    transition: var(--transicion);
+  }
+
+  .prediction-badge .conf-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--lila-medio);
+  }
+
+  .prediction-badge.high-conf .conf-dot {
+    background: #4cde98;
+  }
+
+  .camera-controls {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--texto-claro);
+    font-weight: 600;
+  }
+
+  .status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: var(--transicion);
+  }
+
+  .status-dot.active {
+    background: #4cde98;
+    box-shadow: 0 0 6px rgba(76,222,152,0.6);
+    animation: blink 1.2s ease infinite;
+  }
+
+  .status-dot.paused {
+    background: #f5c842;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* ---- Panel resultado ---- */
+  .result-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .result-game-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--sombra);
+    animation: slideIn 0.4s ease;
+    border: 2px solid var(--lila-claro);
+  }
+
+  @keyframes slideIn {
+    from { opacity:0; transform: translateX(16px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+
+  .result-game-card.hidden { display: none; }
+
+  .game-header {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .game-name {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--texto-oscuro);
+    margin-bottom: 6px;
+  }
+
+  .instructions-card {
+    background: var(--lila-palido);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--sombra);
+  }
+
+  .instructions-card h4 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--lila-oscuro);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .instructions-text {
+    font-size: 0.9rem;
+    color: var(--texto-oscuro);
+    line-height: 1.7;
+  }
+
+  .waiting-state {
+    background: rgba(255,255,255,0.7);
+    border-radius: 20px;
+    padding: 40px 24px;
+    text-align: center;
+    box-shadow: var(--sombra);
+    border: 2px dashed var(--lila-claro);
+  }
+
+  .waiting-state .wait-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 12px;
+    animation: float 2.5s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+
+  .no-model-banner {
+    background: linear-gradient(135deg, var(--amarillo-pastel), #fff3cd);
+    border: 2px solid #f5c842;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .no-model-banner h4 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #7a6200;
+    margin-bottom: 6px;
+  }
+
+  .no-model-banner p {
+    font-size: 0.88rem;
+    color: #7a6200;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 768px) {
+    .id-layout { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="id-header">
+    <div class="section-title">📷🎮 ¿Cómo se juega?</div>
+    <p class="section-subtitle">Apunta la cámara a la caja del juego y Bombunny te explica las reglas al instante.</p>
+  </div>
+
+  {% if not modelo_listo %}
+  <div class="no-model-banner">
+    <h4>⚠️ Modelo en entrenamiento</h4>
+    <p>
+      El modelo de reconocimiento visual todavía no está entrenado.
+      En cuanto tengas el dataset de fotos listo, ejecuta <code>python train_model.py</code> y esta pantalla se activará automáticamente.
+      <br/>Por ahora puedes explorar la interfaz y el resto de funciones de Bombunny.
+    </p>
+  </div>
+  {% endif %}
+
+  <div class="id-layout">
+    <!-- Panel cámara -->
+    <div class="camera-panel">
+      <div class="camera-wrapper">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="canvas-capture"></canvas>
+
+        <div class="camera-overlay">
+          <div class="scan-frame" id="scan-frame"></div>
+          <div id="prediction-badge" class="prediction-badge" style="display:none">
+            <div class="conf-dot"></div>
+            <span id="badge-text">Analizando...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Cámara inactiva</span>
+      </div>
+
+      <div class="camera-controls">
+        <button class="btn-primary" id="btn-camara" onclick="toggleCamara()">📷 Activar cámara</button>
+        <button class="btn-secondary" id="btn-nuevo" onclick="buscarNuevo()" style="display:none">🔄 Nuevo juego</button>
+      </div>
+    </div>
+
+    <!-- Panel resultado -->
+    <div class="result-panel">
+      <div id="waiting-state" class="waiting-state">
+        <span class="wait-icon">📦</span>
+        <p style="font-weight:700;font-size:1.05rem;color:var(--texto-oscuro)">Muéstrame un juego</p>
+        <p style="font-size:0.88rem;color:var(--texto-claro);margin-top:6px">
+          Activa la cámara y acerca la caja de cualquier juego de tu colección.
+        </p>
+      </div>
+
+      <div id="result-game-card" class="result-game-card hidden">
+        <div class="game-header">
+          <div id="result-cover"></div>
+          <div>
+            <div class="game-name" id="result-name"></div>
+            <div id="result-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+            <p id="result-premisa" style="font-size:0.88rem;color:var(--texto-claro);line-height:1.55"></p>
+          </div>
+        </div>
+        <div id="result-youtube" style="margin-bottom:14px"></div>
+      </div>
+
+      <div id="instructions-card" class="instructions-card" style="display:none">
+        <h4>📖 ¿Cómo se juega?</h4>
+        <div class="instructions-text" id="instructions-text"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const modeloListo = {{ 'true' if modelo_listo else 'false' }};
+
+  let stream = null;
+  let camaraActiva = false;
+  let pausada = false;
+  let intervaloId = null;
+  let confianzaAlta = false;
+
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas-capture');
+  const ctx = canvas.getContext('2d');
+
+  const UMBRAL_CONFIANZA = 75;   // % mínimo para pausar y mostrar resultado
+  const INTERVALO_MS = 1500;     // ms entre capturas
+
+  async function toggleCamara() {
+    if (!camaraActiva) {
+      await activarCamara();
+    } else {
+      detenerCamara();
+    }
+  }
+
+  async function activarCamara() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
+      });
+      video.srcObject = stream;
+      camaraActiva = true;
+      pausada = false;
+
+      setStatus('active', '📡 Escaneando...');
+      document.getElementById('btn-camara').textContent = '⏹ Detener';
+      document.getElementById('prediction-badge').style.display = 'flex';
+
+      if (modeloListo) {
+        intervaloId = setInterval(capturarYPredecir, INTERVALO_MS);
+      } else {
+        document.getElementById('badge-text').textContent = '⚠️ Modelo no entrenado';
+        document.getElementById('prediction-badge').style.display = 'flex';
+      }
+    } catch (e) {
+      alert('No se pudo acceder a la cámara. Asegúrate de dar permiso.');
+    }
+  }
+
+  function detenerCamara() {
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    if (intervaloId) { clearInterval(intervaloId); intervaloId = null; }
+    camaraActiva = false;
+    pausada = false;
+
+    setStatus('inactive', 'Cámara inactiva');
+    document.getElementById('btn-camara').textContent = '📷 Activar cámara';
+    document.getElementById('btn-nuevo').style.display = 'none';
+    document.getElementById('prediction-badge').style.display = 'none';
+    document.getElementById('scan-frame').classList.remove('detected');
+  }
+
+  async function capturarYPredecir() {
+    if (pausada || !camaraActiva || video.readyState < 2) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+    try {
+      const res = await fetch('/identificador/predecir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imagen: imageData }),
+      });
+      const data = await res.json();
+
+      if (data.estado === 'ok') {
+        mostrarBadge(data.nombre, data.confianza);
+        if (data.confianza >= UMBRAL_CONFIANZA) {
+          pausarYMostrar(data);
+        }
+      } else if (data.estado === 'sin_modelo') {
+        document.getElementById('badge-text').textContent = '⚠️ Modelo no entrenado';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function mostrarBadge(nombre, confianza) {
+    const badge = document.getElementById('prediction-badge');
+    const texto = document.getElementById('badge-text');
+    badge.style.display = 'flex';
+    texto.textContent = `${nombre} · ${confianza}%`;
+    if (confianza >= UMBRAL_CONFIANZA) {
+      badge.classList.add('high-conf');
+    } else {
+      badge.classList.remove('high-conf');
+    }
+  }
+
+  function pausarYMostrar(data) {
+    pausada = true;
+    if (intervaloId) { clearInterval(intervaloId); intervaloId = null; }
+
+    document.getElementById('scan-frame').classList.add('detected');
+    setStatus('paused', `✅ ¡${data.nombre} identificado!`);
+    document.getElementById('btn-nuevo').style.display = 'inline-flex';
+    document.getElementById('btn-camara').textContent = '⏹ Detener';
+
+    renderizarResultado(data.info || { Nombre: data.nombre, Confianza: data.confianza });
+  }
+
+  function buscarNuevo() {
+    pausada = false;
+    confianzaAlta = false;
+
+    document.getElementById('scan-frame').classList.remove('detected');
+    document.getElementById('result-game-card').classList.add('hidden');
+    document.getElementById('instructions-card').style.display = 'none';
+    document.getElementById('waiting-state').style.display = 'block';
+    document.getElementById('btn-nuevo').style.display = 'none';
+
+    setStatus('active', '📡 Escaneando...');
+    intervaloId = setInterval(capturarYPredecir, INTERVALO_MS);
+  }
+
+  function renderizarResultado(info) {
+    document.getElementById('waiting-state').style.display = 'none';
+
+    // Foto
+    const coverEl = document.getElementById('result-cover');
+    if (info.Foto) {
+      coverEl.innerHTML = `
+        <img class="game-cover" src="/static/img/portadas/${info.Foto}" alt="${info.Nombre}"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="game-cover-placeholder" style="display:none">🎲</div>`;
+    } else {
+      coverEl.innerHTML = `<div class="game-cover-placeholder">🎲</div>`;
+    }
+
+    document.getElementById('result-name').textContent = info.Nombre || 'Juego desconocido';
+
+    // Tags
+    const badgeClass = { 'Bajo':'bajo','Medio':'medio','Alto':'alto','Varía':'varia' }[info.Complejidad] || 'bajo';
+    const tagsEl = document.getElementById('result-tags');
+    tagsEl.innerHTML = info.Complejidad
+      ? `<span class="badge badge-${badgeClass}">${info.Complejidad}</span>
+         <span class="tag">👥 ${info.Min}–${info.Max}</span>
+         <span class="tag">⏱ ${info.Tiempo} min</span>`
+      : '';
+
+    document.getElementById('result-premisa').textContent = info.Premisa || '';
+
+    // YouTube
+    const ytEl = document.getElementById('result-youtube');
+    ytEl.innerHTML = info.Youtube
+      ? `<a href="${info.Youtube}" target="_blank" class="btn-youtube">▶ Ver cómo se juega en YouTube</a>`
+      : '';
+
+    document.getElementById('result-game-card').classList.remove('hidden');
+
+    // Instrucciones divertidas generadas desde la premisa
+    if (info.Premisa) {
+      renderizarInstrucciones(info.Nombre, info.Premisa, info.Complejidad);
+    }
+  }
+
+  function renderizarInstrucciones(nombre, premisa, complejidad) {
+    const nivelEmoji = { 'Bajo':'🟢','Medio':'🟡','Alto':'🔴','Varía':'🔵' }[complejidad] || '⚪';
+    const card = document.getElementById('instructions-card');
+    document.getElementById('instructions-text').innerHTML = `
+      <p>🎯 <strong>El objetivo:</strong> ${premisa}</p>
+      <br/>
+      <p>📌 <strong>Nivel de dificultad:</strong> ${nivelEmoji} ${complejidad || 'No especificado'}</p>
+      <br/>
+      <p>💡 <strong>Tip Bombunny:</strong> Lee las reglas completas antes de empezar y haz una ronda de práctica — ¡así la primera partida de verdad es mucho más divertida! 🐰💣</p>
+    `;
+    card.style.display = 'block';
+  }
+
+  function setStatus(state, text) {
+    const dot = document.getElementById('status-dot');
+    const txt = document.getElementById('status-text');
+    dot.className = 'status-dot' + (state === 'active' ? ' active' : state === 'paused' ? ' paused' : '');
+    txt.textContent = text;
+  }
+</script>
+{% endblock %}

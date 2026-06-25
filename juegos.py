@@ -1,22 +1,21 @@
 import pandas as pd
 
-# Creamos el diccionario con los datos corregidos de tu colección
 datos_ludoteca = {
     "Nombre del juego": [
-        "Love letter", "Penguin Breaking Ice", "Ka-Blab!", "Carcassonne", "doodle dice", 
-        "Deep Dreams", "UNO show'em no mercy", "UNO", "Hive", "Virus", "Virus 2", 
-        "Unstable unicorns", "Tides of madness", "The fox in the forest", "Fantasma blitz", 
-        "Exploding kittens", "Código secreto", "Taco Gato Cabra Queso Pizza", "Polilla tramposa", 
-        "La feria de las pulgas de Titirilquén", "Domino", "Clues express", "Deep Sea", 
-        "Spot it! Classic", "Spot it! Gone Camping", "Star Realms", "Happy Little Dinosaurs", 
-        "Reyes de la Rosca", "Four field cone", "Poker", "Baraja Española", "Conecta 4", 
-        "Catan", "Survive the Island", "Rummy", "Ajedrez", "Turista mundial", 
+        "Love letter", "Penguin Breaking Ice", "Ka-Blab!", "Carcassonne", "doodle dice",
+        "Deep Dreams", "UNO show'em no mercy", "UNO", "Hive", "Virus", "Virus 2",
+        "Unstable unicorns", "Tides of madness", "The fox in the forest", "Fantasma blitz",
+        "Exploding kittens", "Código secreto", "Taco Gato Cabra Queso Pizza", "Polilla tramposa",
+        "La feria de las pulgas de Titirilquén", "Domino", "Clues express", "Deep Sea",
+        "Spot it! Classic", "Spot it! Gone Camping", "Star Realms", "Happy Little Dinosaurs",
+        "Reyes de la Rosca", "Four field cone", "Poker", "Baraja Española", "Conecta 4",
+        "Catan", "Survive the Island", "Rummy", "Ajedrez", "Turista mundial",
         "Serpientes y escaleras", "¡Basta!", "Igloo mania"
     ],
     "Nivel de complejidad": [
-        "Bajo", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Medio", "Bajo", 
-        "Bajo", "Medio", "Medio", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo", 
-        "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Medio", 
+        "Bajo", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Medio", "Bajo",
+        "Bajo", "Medio", "Medio", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo",
+        "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Medio",
         "Varía", "Bajo", "Alto", "Medio", "Medio", "Alto", "Bajo", "Bajo", "Bajo", "Bajo"
     ],
     "Premisa del juego": [
@@ -61,9 +60,72 @@ datos_ludoteca = {
         "Juego de agilidad mental y vocabulario; se elige una letra al azar y se completan categorías (Nombre, Flor, Fruto) antes de que alguien detenga el tiempo.",
         "Juego de habilidad física donde los jugadores retiran bloques de hielo de un iglú usando un gancho, intentando que la estructura no colapse."
     ],
-    "Tiempo de juego (min)": [20, 15, 20, 35, 30, 15, 25, 20, 15, 20, 20, 35, 20, 30, 25, 15, 15, 10, 20, 30, 20, 15, 30, 15, 15, 30, 40, 20, 10, 20, 20, 10, 75, 45, 30, 30, 50, 20, 15, 15],
-    "min jugadores": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2],
-    "max jugadores": [6, 4, 6, 5, 6, 5, 6, 10, 2, 6, 6, 8, 2, 2, 8, 5, 8, 8, 5, 10, 4, 4, 6, 8, 8, 4, 4, 6, 2, 10, 10, 2, 4, 5, 4, 2, 6, 6, 8, 4]
+    "Tiempo de juego (min)": [
+        20, 15, 20, 35, 30, 15, 25, 20, 15, 20, 20, 35, 20, 30, 25, 15, 15, 10, 20, 30,
+        20, 15, 30, 15, 15, 30, 40, 20, 10, 20, 20, 10, 75, 45, 30, 30, 50, 20, 15, 15
+    ],
+    "min jugadores": [
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3,
+        2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2
+    ],
+    "max jugadores": [
+        6, 4, 6, 5, 6, 5, 6, 10, 2, 6, 6, 8, 2, 2, 8, 5, 8, 8, 5, 10,
+        4, 4, 6, 8, 8, 4, 4, 6, 2, 10, 10, 2, 4, 5, 4, 2, 6, 6, 8, 4
+    ],
+    "foto": [
+        "love_letter.jpg", "penguin_breaking_ice.jpg", "ka_blab.jpg", "carcassonne.jpg",
+        "doodle_dice.jpg", "deep_dreams.jpg", "uno_showem.jpg", "uno.jpg", "hive.jpg",
+        "virus.jpg", "virus_2.jpg", "unstable_unicorns.jpg", "tides_of_madness.jpg",
+        "fox_in_the_forest.jpg", "fantasma_blitz.jpg", "exploding_kittens.jpg",
+        "codigo_secreto.jpg", "taco_gato.jpg", "polilla_tramposa.jpg", "feria_titirilquen.jpg",
+        "domino.jpg", "clues_express.jpg", "deep_sea.jpg", "spot_it_classic.jpg",
+        "spot_it_camping.jpg", "star_realms.jpg", "happy_little_dinosaurs.jpg",
+        "reyes_rosca.jpg", "four_field_cone.jpg", "poker.jpg", "baraja_espanola.jpg",
+        "conecta_4.jpg", "catan.jpg", "survive_island.jpg", "rummy.jpg", "ajedrez.jpg",
+        "turista_mundial.jpg", "serpientes_escaleras.jpg", "basta.jpg", "igloo_mania.jpg"
+    ],
+    "youtube": [
+        "https://www.youtube.com/results?search_query=love+letter+juego+de+mesa+como+se+juega",
+        "https://www.youtube.com/results?search_query=penguin+breaking+ice+como+se+juega",
+        "https://www.youtube.com/results?search_query=ka+blab+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=carcassonne+juego+de+mesa+como+se+juega",
+        "https://www.youtube.com/results?search_query=doodle+dice+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=deep+dreams+juego+de+mesa+como+se+juega",
+        "https://www.youtube.com/results?search_query=uno+showem+no+mercy+como+se+juega",
+        "https://www.youtube.com/results?search_query=uno+juego+de+cartas+como+se+juega",
+        "https://www.youtube.com/results?search_query=hive+juego+de+mesa+como+se+juega",
+        "https://www.youtube.com/results?search_query=virus+juego+de+cartas+como+se+juega",
+        "https://www.youtube.com/results?search_query=virus+2+juego+expansion+como+se+juega",
+        "https://www.youtube.com/results?search_query=unstable+unicorns+como+se+juega",
+        "https://www.youtube.com/results?search_query=tides+of+madness+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=the+fox+in+the+forest+como+se+juega",
+        "https://www.youtube.com/results?search_query=fantasma+blitz+como+se+juega",
+        "https://www.youtube.com/results?search_query=exploding+kittens+como+se+juega",
+        "https://www.youtube.com/results?search_query=codigo+secreto+juego+de+mesa+como+se+juega",
+        "https://www.youtube.com/results?search_query=taco+gato+cabra+queso+pizza+como+se+juega",
+        "https://www.youtube.com/results?search_query=polilla+tramposa+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=feria+de+las+pulgas+titirilquen+juego",
+        "https://www.youtube.com/results?search_query=domino+como+se+juega+reglas",
+        "https://www.youtube.com/results?search_query=clues+express+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=deep+sea+adventure+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=spot+it+dobble+como+se+juega",
+        "https://www.youtube.com/results?search_query=spot+it+gone+camping+como+se+juega",
+        "https://www.youtube.com/results?search_query=star+realms+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=happy+little+dinosaurs+como+se+juega",
+        "https://www.youtube.com/results?search_query=reyes+de+la+rosca+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=four+field+kono+juego+abstracto",
+        "https://www.youtube.com/results?search_query=poker+reglas+como+se+juega",
+        "https://www.youtube.com/results?search_query=baraja+espanola+juegos+como+se+juega",
+        "https://www.youtube.com/results?search_query=conecta+4+como+se+juega",
+        "https://www.youtube.com/results?search_query=catan+juego+de+mesa+como+se+juega",
+        "https://www.youtube.com/results?search_query=survive+escape+from+atlantis+como+se+juega",
+        "https://www.youtube.com/results?search_query=rummy+juego+de+mesa+como+se+juega",
+        "https://www.youtube.com/results?search_query=ajedrez+como+se+juega+para+principiantes",
+        "https://www.youtube.com/results?search_query=turista+mundial+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=serpientes+y+escaleras+como+se+juega",
+        "https://www.youtube.com/results?search_query=basta+stop+juego+como+se+juega",
+        "https://www.youtube.com/results?search_query=igloo+mania+juego+como+se+juega"
+    ]
 }
 
 df = pd.DataFrame(datos_ludoteca)

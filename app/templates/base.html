@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Bombunny 🐰💣{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span class="logo-emoji">🐰💣</span>
+      Bombunny
+    </a>
+    {% if show_home_btn is not defined or show_home_btn %}
+    <a href="/" class="btn-home">
+      ← Inicio
+    </a>
+    {% endif %}
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
