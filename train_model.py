@@ -28,15 +28,11 @@ NUM_EPOCHS  = 25
 BATCH_SIZE  = 32
 LEARNING_RATE = 1e-4
 
-# Estas variables se rellenan en entrenar() y son necesarias a nivel de módulo
-# para que GameDataset sea picklable en Windows (multiprocessing spawn)
-_rutas    = []
-_labels   = []
-_extractor = None
-_aug       = None
+# Variables globales — module-level para que GameDataset sea picklable en Windows
+_tensors = []   # lista de tensores float32 pre-procesados [C, H, W]
+_labels  = []
 
 
-# Nivel de módulo — requerido por Windows multiprocessing para poder pickle la clase
 class GameDataset:
     def __init__(self, indices, augment=False):
         self.indices = indices
@@ -46,11 +42,20 @@ class GameDataset:
         return len(self.indices)
 
     def __getitem__(self, i):
+        import torchvision.transforms.functional as TF
         idx = self.indices[i]
-        img = _rutas[idx].copy()  # copia para no mutar la imagen en RAM
-        if self.augment and _aug is not None:
-            img = _aug(img)
-        pv = _extractor(images=img, return_tensors="pt")["pixel_values"][0]
+        pv = _tensors[idx].clone()
+
+        if self.augment:
+            if random.random() > 0.5:
+                pv = TF.hflip(pv)
+            angle = random.uniform(-20, 20)
+            pv = TF.rotate(pv, angle)
+            pv = TF.adjust_brightness(pv, 1 + random.uniform(-0.4, 0.4))
+            pv = TF.adjust_contrast(pv,   1 + random.uniform(-0.4, 0.4))
+            pv = TF.adjust_saturation(pv, 1 + random.uniform(-0.3, 0.3))
+            pv = TF.adjust_hue(pv, random.uniform(-0.05, 0.05))
+
         return {"pixel_values": pv, "labels": _labels[idx]}
 
 
@@ -76,12 +81,11 @@ def verificar_dataset():
 
 
 def entrenar():
-    global _rutas, _labels, _extractor, _aug
+    global _tensors, _labels
 
     try:
         import torch
         from PIL import Image
-        from torchvision import transforms
         from transformers import AutoImageProcessor, AutoModelForImageClassification, TrainingArguments, Trainer
         import numpy as np
     except ImportError as e:
@@ -105,19 +109,11 @@ def entrenar():
     id2label  = {i: label for i, label in enumerate(etiquetas)}
 
     print(f"\n📥 Cargando procesador de imágenes ({MODEL_BASE})...")
-    _extractor = AutoImageProcessor.from_pretrained(MODEL_BASE)
+    extractor = AutoImageProcessor.from_pretrained(MODEL_BASE)
 
-    # Augmentation para entrenamiento
-    _aug = transforms.Compose([
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(degrees=20),
-        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.3, hue=0.05),
-        transforms.RandomPerspective(distortion_scale=0.2, p=0.4),
-        transforms.RandomGrayscale(p=0.05),
-    ])
-
-    # Pre-cargar todas las imágenes en RAM (270 imgs ≈ 80MB — evita I/O de disco en cada step)
-    print("🖼️  Cargando imágenes en memoria...")
+    # Pre-procesar TODAS las imágenes en tensores una sola vez (≈450 MB RAM)
+    # Esto elimina la llamada al extractor en cada step del entrenamiento
+    print("🖼️  Pre-procesando imágenes a tensores...")
     for label in etiquetas:
         carpeta = Path(DATASET_DIR) / label
         for img_path in sorted(carpeta.glob("*")):
@@ -125,17 +121,17 @@ def entrenar():
                 continue
             try:
                 img = Image.open(img_path).convert("RGB")
-                img.load()  # fuerza descompresión en RAM ahora
-                _rutas.append(img)
+                pv = extractor(images=img, return_tensors="pt")["pixel_values"][0]
+                _tensors.append(pv)
                 _labels.append(label2id[label])
             except Exception as e:
                 print(f"  ⚠️  Saltando {img_path.name}: {e}")
 
-    if not _rutas:
+    if not _tensors:
         print("❌ No se encontraron imágenes.")
         return
 
-    print(f"✅ {len(_rutas)} imágenes en memoria.")
+    print(f"✅ {len(_tensors)} tensores en memoria.")
 
     # División estratificada 80-20
     por_clase = defaultdict(list)
@@ -179,8 +175,7 @@ def entrenar():
 
         return {"accuracy": float(acc)}
 
-    # num_workers=0 en Windows: spawn no hereda globals del proceso principal
-    num_workers = 0
+    num_workers = 0  # Windows spawn no hereda globals del proceso principal
 
     args = TrainingArguments(
         output_dir=OUTPUT_DIR,
@@ -212,7 +207,7 @@ def entrenar():
 
     print("\n💾 Guardando modelo...")
     trainer.save_model(OUTPUT_DIR)
-    _extractor.save_pretrained(OUTPUT_DIR)
+    extractor.save_pretrained(OUTPUT_DIR)
 
     with open(os.path.join(OUTPUT_DIR, "labels.txt"), "w") as f:
         f.write("\n".join(etiquetas))
