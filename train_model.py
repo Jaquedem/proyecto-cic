@@ -29,8 +29,9 @@ BATCH_SIZE  = 32
 LEARNING_RATE = 1e-4
 
 # Variables globales — module-level para que GameDataset sea picklable en Windows
-_tensors = []   # lista de tensores float32 pre-procesados [C, H, W]
-_labels  = []
+_tensors   = []   # tensores float32 en rango [0,1] — sin normalizar todavía
+_labels    = []
+_normalize = None  # torchvision.transforms.Normalize, se asigna en entrenar()
 
 
 class GameDataset:
@@ -44,7 +45,7 @@ class GameDataset:
     def __getitem__(self, i):
         import torchvision.transforms.functional as TF
         idx = self.indices[i]
-        pv = _tensors[idx].clone()
+        pv = _tensors[idx].clone()  # [C, H, W] en [0, 1]
 
         if self.augment:
             if random.random() > 0.5:
@@ -55,6 +56,11 @@ class GameDataset:
             pv = TF.adjust_contrast(pv,   1 + random.uniform(-0.4, 0.4))
             pv = TF.adjust_saturation(pv, 1 + random.uniform(-0.3, 0.3))
             pv = TF.adjust_hue(pv, random.uniform(-0.05, 0.05))
+            pv = pv.clamp(0.0, 1.0)
+
+        # Normalizar DESPUÉS del augmentation (no antes)
+        if _normalize is not None:
+            pv = _normalize(pv)
 
         return {"pixel_values": pv, "labels": _labels[idx]}
 
@@ -81,11 +87,12 @@ def verificar_dataset():
 
 
 def entrenar():
-    global _tensors, _labels
+    global _tensors, _labels, _normalize
 
     try:
         import torch
         from PIL import Image
+        from torchvision import transforms
         from transformers import AutoImageProcessor, AutoModelForImageClassification, TrainingArguments, Trainer
         import numpy as np
     except ImportError as e:
@@ -111,9 +118,17 @@ def entrenar():
     print(f"\n📥 Cargando procesador de imágenes ({MODEL_BASE})...")
     extractor = AutoImageProcessor.from_pretrained(MODEL_BASE)
 
-    # Pre-procesar TODAS las imágenes en tensores una sola vez (≈450 MB RAM)
-    # Esto elimina la llamada al extractor en cada step del entrenamiento
-    print("🖼️  Pre-procesando imágenes a tensores...")
+    # Preparar normalización y resize usando los parámetros del extractor
+    img_size = extractor.size.get("height", 380)
+    _normalize = transforms.Normalize(mean=extractor.image_mean, std=extractor.image_std)
+    to_tensor  = transforms.Compose([
+        transforms.Resize((img_size, img_size)),
+        transforms.ToTensor(),  # convierte a [C,H,W] float en [0,1]
+    ])
+
+    # Pre-procesar TODAS las imágenes a tensores [0,1] sin normalizar (≈450 MB RAM)
+    # La normalización se aplica en __getitem__ DESPUÉS del augmentation
+    print(f"🖼️  Pre-procesando imágenes a tensores {img_size}×{img_size}...")
     for label in etiquetas:
         carpeta = Path(DATASET_DIR) / label
         for img_path in sorted(carpeta.glob("*")):
@@ -121,7 +136,7 @@ def entrenar():
                 continue
             try:
                 img = Image.open(img_path).convert("RGB")
-                pv = extractor(images=img, return_tensors="pt")["pixel_values"][0]
+                pv = to_tensor(img)  # [C,H,W] float en [0,1]
                 _tensors.append(pv)
                 _labels.append(label2id[label])
             except Exception as e:
@@ -190,7 +205,7 @@ def entrenar():
         report_to="none",
         dataloader_num_workers=num_workers,
         warmup_steps=50,
-        fp16=use_gpu,
+        bf16=use_gpu,   # bfloat16: mismo rendimiento que fp16 pero sin NaN
         dataloader_pin_memory=use_gpu,
     )
 
