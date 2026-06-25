@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% block title %}Recomendador — Bombunny{% endblock %}
+
+{% block head_extra %}
+<style>
+  .rec-header {
+    padding: 40px 0 24px;
+    text-align: center;
+  }
+
+  .search-box {
+    background: rgba(255,255,255,0.92);
+    border-radius: 24px;
+    padding: 28px 32px;
+    box-shadow: var(--sombra);
+    margin-bottom: 36px;
+  }
+
+  .filters-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--texto-medio);
+  }
+
+  .filter-input {
+    border: 2px solid var(--lila-claro);
+    border-radius: 50px;
+    padding: 7px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    color: var(--texto-oscuro);
+    background: white;
+    outline: none;
+    width: 80px;
+    transition: var(--transicion);
+  }
+
+  .filter-input:focus {
+    border-color: var(--lila-oscuro);
+    box-shadow: 0 0 0 3px rgba(155,127,199,0.12);
+  }
+
+  .results-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--texto-medio);
+    margin-bottom: 18px;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+  }
+
+  .result-card {
+    background: rgba(255,255,255,0.92);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: var(--sombra);
+    transition: var(--transicion);
+    border: 2px solid transparent;
+  }
+
+  .result-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-hover);
+    border-color: var(--lila-claro);
+  }
+
+  .result-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .result-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--texto-oscuro);
+    margin-bottom: 6px;
+  }
+
+  .result-premisa {
+    font-size: 0.86rem;
+    color: var(--texto-claro);
+    line-height: 1.55;
+    margin: 8px 0;
+  }
+
+  .result-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .result-score {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .score-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--lila-palido);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lila-medio), var(--lila-oscuro));
+    border-radius: 3px;
+  }
+
+  .score-text {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--lila-oscuro);
+    white-space: nowrap;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--texto-claro);
+  }
+
+  .empty-state .empty-icon {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 40px;
+    color: var(--texto-claro);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="rec-header">
+    <div class="section-title">🔍✨ Recomiéndame un juego</div>
+    <p class="section-subtitle">Describe en tus palabras qué tipo de juego buscas y Bombunny encontrará el perfecto para ti.</p>
+  </div>
+
+  <div class="search-box">
+    <form method="POST" action="/recomendador/buscar">
+      <div class="search-wrapper">
+        <input
+          class="search-input"
+          type="text"
+          name="consulta"
+          placeholder="Ej: quiero algo rápido y divertido para 4 personas que no sea muy complicado..."
+          value="{{ consulta }}"
+          required
+          autofocus
+        />
+        <button type="submit" class="btn-primary">Buscar ✨</button>
+      </div>
+
+      <div class="filters-row">
+        <span class="filter-label">🧑‍🤝‍🧑 Jugadores:</span>
+        <div class="filter-group">
+          <input
+            class="filter-input"
+            type="number"
+            name="num_jugadores"
+            min="1"
+            max="12"
+            placeholder="Ej: 4"
+            value="{{ num_jugadores if num_jugadores else '' }}"
+          />
+        </div>
+
+        <span class="filter-label" style="margin-left:12px">🎯 Complejidad:</span>
+        <div class="filter-group">
+          <select class="filter-input" name="complejidad" style="width:auto;padding:7px 12px">
+            <option value="Todas" {% if not complejidad or complejidad == 'Todas' %}selected{% endif %}>Todas</option>
+            {% for c in complejidades %}
+            <option value="{{ c }}" {% if complejidad == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <span class="filter-label" style="font-weight:400;color:var(--texto-claro)">(opcionales)</span>
+      </div>
+    </form>
+  </div>
+
+  {% if buscando %}
+    {% if resultados %}
+      <div class="results-title">
+        🎲 Bombunny encontró {{ resultados|length }} juego{{ 's' if resultados|length != 1 else '' }} para: <em>"{{ consulta }}"</em>
+      </div>
+      <div class="results-grid">
+        {% for juego in resultados %}
+        <div class="result-card">
+          {% if juego.Foto %}
+          <img
+            class="game-cover"
+            src="/static/img/portadas/{{ juego.Foto }}"
+            alt="{{ juego.Nombre }}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          />
+          <div class="game-cover-placeholder" style="display:none;">🎲</div>
+          {% else %}
+          <div class="game-cover-placeholder">🎲</div>
+          {% endif %}
+
+          <div class="result-info">
+            <div class="result-name">{{ juego.Nombre }}</div>
+
+            <div class="result-tags">
+              <span class="badge badge-{{ juego.Complejidad | lower | replace('varía','varia') }}">
+                {{ juego.Complejidad }}
+              </span>
+              <span class="tag">👥 {{ juego.Min }}–{{ juego.Max }}</span>
+              <span class="tag">⏱ {{ juego.Tiempo }} min</span>
+            </div>
+
+            <p class="result-premisa">{{ juego.Premisa }}</p>
+
+            <div class="result-score">
+              <span class="score-text">Coincidencia</span>
+              <div class="score-bar-bg">
+                <div class="score-bar-fill" style="width: {{ (juego.Similitud | float * 100) | int }}%"></div>
+              </div>
+              <span class="score-text">{{ (juego.Similitud | float * 100) | int }}%</span>
+            </div>
+
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="no-results">
+        <span style="font-size:2.5rem">😕</span>
+        <p style="margin-top:12px;font-weight:700">No encontré juegos que coincidan con tu búsqueda.</p>
+        <p style="margin-top:6px">Intenta con otras palabras o cambia el número de jugadores.</p>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">🐰💭</span>
+      <p style="font-weight:700;font-size:1.05rem">Cuéntale a Bombunny qué buscas...</p>
+      <p style="margin-top:6px">Escribe en el campo de arriba y te recomendaré el juego perfecto.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

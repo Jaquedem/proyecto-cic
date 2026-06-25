@@ -1,0 +1,605 @@
+{% extends "base.html" %}
+{% block title %}Ruleta Aleatoria — Bombunny{% endblock %}
+
+{% block head_extra %}
+<style>
+  .ruleta-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 28px;
+    align-items: start;
+    padding: 32px 0;
+  }
+
+  /* ---- Panel de filtros ---- */
+  .filters-panel {
+    background: rgba(255,255,255,0.92);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--sombra);
+    position: sticky;
+    top: 80px;
+  }
+
+  .filters-panel h3 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--texto-oscuro);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .filter-block {
+    margin-bottom: 20px;
+  }
+
+  .filter-block label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--texto-medio);
+    margin-bottom: 8px;
+  }
+
+  .filter-block .range-value {
+    font-weight: 800;
+    color: var(--lila-oscuro);
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--lila-claro);
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--lila-oscuro);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(155,127,199,0.4);
+    transition: var(--transicion);
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: var(--texto-oscuro);
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: var(--transicion);
+  }
+
+  .checkbox-label:hover {
+    background: var(--lila-palido);
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    accent-color: var(--lila-oscuro);
+    width: 16px;
+    height: 16px;
+  }
+
+  .filter-count {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--texto-claro);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--lila-claro);
+  }
+
+  .filter-count span {
+    color: var(--lila-oscuro);
+    font-weight: 800;
+  }
+
+  /* ---- Área de la ruleta ---- */
+  .ruleta-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .canvas-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .arrow-indicator {
+    font-size: 2.5rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+    z-index: 2;
+    margin-bottom: -8px;
+  }
+
+  #ruletaCanvas {
+    border-radius: 50%;
+    box-shadow: 0 8px 40px rgba(155,127,199,0.3);
+    cursor: grab;
+    display: block;
+  }
+
+  #ruletaCanvas:active {
+    cursor: grabbing;
+  }
+
+  .ruleta-controls {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  /* ---- Card resultado ---- */
+  .resultado-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 24px 28px;
+    box-shadow: var(--sombra-hover);
+    border: 2px solid var(--lila-claro);
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes popIn {
+    from { opacity:0; transform: scale(0.85); }
+    to   { opacity:1; transform: scale(1); }
+  }
+
+  .resultado-card.hidden { display: none; }
+
+  .resultado-game-img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    border-radius: 14px;
+    margin: 0 auto 14px;
+    display: block;
+    box-shadow: var(--sombra);
+    background: #ffffff;
+    padding: 4px;
+  }
+
+  .resultado-game-placeholder {
+    width: 110px;
+    height: 110px;
+    background: linear-gradient(135deg, var(--lila-claro), var(--rosa-pastel));
+    border-radius: 14px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+  }
+
+  .resultado-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--texto-oscuro);
+    margin-bottom: 10px;
+  }
+
+  .resultado-tags {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .resultado-premisa {
+    font-size: 0.88rem;
+    color: var(--texto-claro);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .empty-wheel {
+    text-align: center;
+    padding: 40px;
+    color: var(--texto-claro);
+  }
+
+  @media (max-width: 768px) {
+    .ruleta-layout {
+      grid-template-columns: 1fr;
+    }
+    .filters-panel { position: static; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div style="padding: 32px 0 8px; text-align:center">
+    <div class="section-title">🎡🎲 Ruleta aleatoria</div>
+    <p class="section-subtitle">Aplica filtros y haz girar la ruleta — ¡el destino elige por ti!</p>
+  </div>
+
+  <div class="ruleta-layout">
+
+    <!-- Panel de filtros -->
+    <aside class="filters-panel">
+      <h3>🎛️ Filtros</h3>
+
+      <div class="filter-block">
+        <label>👥 Número de jugadores: <span class="range-value" id="val-jugadores">Cualquiera</span></label>
+        <input type="range" id="filter-jugadores" min="0" max="{{ max_jugadores }}" value="0" step="1" />
+      </div>
+
+      <div class="filter-block">
+        <label>⏱ Rango de tiempo: <span class="range-value" id="val-tiempo">Cualquiera</span></label>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <input type="number" id="filter-tiempo-min" min="0" max="{{ max_tiempo }}" value=""
+            placeholder="min" style="width:64px;padding:5px 8px;border:2px solid var(--lila-claro);border-radius:10px;font-family:inherit;font-size:0.85rem;outline:none;" />
+          <span style="color:var(--texto-claro);font-size:0.85rem">—</span>
+          <input type="number" id="filter-tiempo-max" min="0" max="{{ max_tiempo }}" value=""
+            placeholder="max" style="width:64px;padding:5px 8px;border:2px solid var(--lila-claro);border-radius:10px;font-family:inherit;font-size:0.85rem;outline:none;" />
+          <span style="color:var(--texto-claro);font-size:0.82rem">min</span>
+        </div>
+      </div>
+
+      <div class="filter-block">
+        <label>🧠 Complejidad:</label>
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" value="Todas" id="check-todas" checked /> Todas
+          </label>
+          {% for c in complejidades %}
+          <label class="checkbox-label">
+            <input type="checkbox" value="{{ c }}" class="check-complejidad" /> {{ c }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="filter-count">
+        <span id="juegos-count">{{ total }}</span> juegos en la ruleta
+      </div>
+    </aside>
+
+    <!-- Área central -->
+    <div class="ruleta-area">
+      <div class="canvas-wrapper">
+        <div class="arrow-indicator">▼</div>
+        <canvas id="ruletaCanvas" width="420" height="420"></canvas>
+      </div>
+
+      <div class="ruleta-controls">
+        <button class="btn-primary" id="btn-girar" onclick="girarRuleta()">🎲 ¡Girar!</button>
+        <button class="btn-secondary" onclick="resetFiltros()">↺ Resetear</button>
+      </div>
+
+      <div id="resultado-card" class="resultado-card hidden"></div>
+      <div id="empty-wheel" class="empty-wheel hidden" style="display:none">
+        <span style="font-size:2rem">😕</span>
+        <p style="font-weight:700;margin-top:8px">Ningún juego cumple esos filtros</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // ---- Estado global ----
+  let juegos = [];
+  let anguloActual = 0;
+  let girando = false;
+
+  // ---- Paleta de colores para sectores ----
+  const COLORES = [
+    '#d9ccf0','#f5d0e8','#c8eee4','#fdf3c8',
+    '#c8dff5','#ede8f9','#f9ddd4','#d4edf9',
+    '#e8f5d0','#f5e8d0','#d0e8f5','#f5d0d0',
+  ];
+
+  const canvas = document.getElementById('ruletaCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // ---- Inicialización ----
+  cargarJuegos(0, null, null, 'Todas', false);
+
+  // ---- Carga y renderizado ----
+  // showEmpty: mostrar mensaje vacío si no hay juegos (false en carga inicial)
+  async function cargarJuegos(jugadores=0, tiempoMin=null, tiempoMax=null, complejidad='Todas', showEmpty=true) {
+    const params = new URLSearchParams({ jugadores, complejidad });
+    if (tiempoMin) params.set('tiempo_min', tiempoMin);
+    if (tiempoMax) params.set('tiempo_max', tiempoMax);
+    const res = await fetch(`/ruleta/filtrar?${params}`);
+    const data = await res.json();
+    juegos = data.juegos;
+    document.getElementById('juegos-count').textContent = data.total;
+
+    if (juegos.length === 0) {
+      if (showEmpty) document.getElementById('empty-wheel').classList.remove('hidden');
+      limpiarCanvas();
+    } else {
+      document.getElementById('empty-wheel').classList.add('hidden');
+      dibujarRuleta(anguloActual);
+    }
+  }
+
+  function limpiarCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ede8f9';
+    ctx.beginPath();
+    ctx.arc(canvas.width/2, canvas.height/2, canvas.width/2 - 4, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#b89de0';
+    ctx.font = 'bold 16px Nunito, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Sin juegos', canvas.width/2, canvas.height/2);
+  }
+
+  function dibujarRuleta(offsetAngle = 0) {
+    if (juegos.length === 0) { limpiarCanvas(); return; }
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const r = canvas.width / 2 - 4;
+    const slice = (2 * Math.PI) / juegos.length;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    juegos.forEach((juego, i) => {
+      const startAngle = offsetAngle + i * slice;
+      const endAngle = startAngle + slice;
+
+      // Sector
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = COLORES[i % COLORES.length];
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Texto
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(startAngle + slice / 2);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#3d2f5c';
+      ctx.font = `bold ${Math.max(10, Math.min(13, 220 / juegos.length))}px Nunito, sans-serif`;
+
+      const nombre = juego['Nombre del juego'];
+      const maxLen = 16;
+      const label = nombre.length > maxLen ? nombre.substring(0, maxLen) + '…' : nombre;
+      ctx.fillText(label, r - 12, 4);
+      ctx.restore();
+    });
+
+    // Centro decorativo
+    ctx.beginPath();
+    ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+    ctx.fillStyle = '#9b7fc7';
+    ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 16px Nunito, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🐰', cx, cy + 5);
+  }
+
+  // ---- Animación de giro ----
+  function girarRuleta() {
+    if (girando || juegos.length === 0) return;
+    girando = true;
+    document.getElementById('btn-girar').disabled = true;
+    document.getElementById('resultado-card').classList.add('hidden');
+
+    const vueltasExtra = 5 + Math.random() * 5;
+    const anguloFinal = anguloActual + (vueltasExtra * 2 * Math.PI) + Math.random() * 2 * Math.PI;
+    const duracion = 3500;
+    const inicio = performance.now();
+    const anguloInicio = anguloActual;
+
+    function easeOut(t) {
+      return 1 - Math.pow(1 - t, 4);
+    }
+
+    function animar(tiempo) {
+      const elapsed = tiempo - inicio;
+      const t = Math.min(elapsed / duracion, 1);
+      anguloActual = anguloInicio + (anguloFinal - anguloInicio) * easeOut(t);
+      dibujarRuleta(anguloActual);
+
+      if (t < 1) {
+        requestAnimationFrame(animar);
+      } else {
+        girando = false;
+        document.getElementById('btn-girar').disabled = false;
+        mostrarResultado();
+      }
+    }
+
+    requestAnimationFrame(animar);
+  }
+
+  function mostrarResultado() {
+    const slice = (2 * Math.PI) / juegos.length;
+    // La flecha apunta hacia arriba (ángulo -π/2). Calculamos qué sector queda arriba.
+    const anguloNormalizado = (((-anguloActual - Math.PI / 2) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    const idx = Math.floor(anguloNormalizado / slice) % juegos.length;
+    const juego = juegos[idx];
+
+    const badgeClass = {
+      'Bajo': 'bajo', 'Medio': 'medio', 'Alto': 'alto', 'Varía': 'varia'
+    }[juego['Nivel de complejidad']] || 'bajo';
+
+    const fotoHTML = juego.foto
+      ? `<img class="resultado-game-img" src="/static/img/portadas/${juego.foto}" alt="${juego['Nombre del juego']}"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+         <div class="resultado-game-placeholder" style="display:none">🎲</div>`
+      : `<div class="resultado-game-placeholder">🎲</div>`;
+
+    document.getElementById('resultado-card').innerHTML = `
+      ${fotoHTML}
+      <div class="resultado-name">🎉 ${juego['Nombre del juego']}</div>
+      <div class="resultado-tags">
+        <span class="badge badge-${badgeClass}">${juego['Nivel de complejidad']}</span>
+        <span class="tag">👥 ${juego['min jugadores']}–${juego['max jugadores']}</span>
+        <span class="tag">⏱ ${juego['Tiempo de juego (min)']} min</span>
+      </div>
+      <p class="resultado-premisa">${juego['Premisa del juego']}</p>
+    `;
+    document.getElementById('resultado-card').classList.remove('hidden');
+  }
+
+  // ---- Drag para girar ----
+  let isDragging = false;
+  let lastAngle = 0;
+  let lastTime = 0;
+  let velocity = 0;
+
+  canvas.addEventListener('mousedown', (e) => {
+    if (girando) return;
+    isDragging = true;
+    lastAngle = getMouseAngle(e);
+    lastTime = performance.now();
+    velocity = 0;
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const angle = getMouseAngle(e);
+    const delta = angle - lastAngle;
+    const now = performance.now();
+    velocity = delta / (now - lastTime) * 16;
+    anguloActual += delta;
+    lastAngle = angle;
+    lastTime = now;
+    dibujarRuleta(anguloActual);
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (Math.abs(velocity) > 0.01) lanzarConVelocidad(velocity);
+  });
+
+  canvas.addEventListener('mouseleave', () => { isDragging = false; });
+
+  function getMouseAngle(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left - canvas.width / 2;
+    const y = e.clientY - rect.top - canvas.height / 2;
+    return Math.atan2(y, x);
+  }
+
+  function lanzarConVelocidad(v) {
+    if (Math.abs(v) < 0.002) { mostrarResultado(); return; }
+    girando = true;
+    document.getElementById('btn-girar').disabled = true;
+    document.getElementById('resultado-card').classList.add('hidden');
+
+    function desacelerar() {
+      anguloActual += v;
+      v *= 0.97;
+      dibujarRuleta(anguloActual);
+      if (Math.abs(v) > 0.002) {
+        requestAnimationFrame(desacelerar);
+      } else {
+        girando = false;
+        document.getElementById('btn-girar').disabled = false;
+        mostrarResultado();
+      }
+    }
+    requestAnimationFrame(desacelerar);
+  }
+
+  // ---- Filtros ----
+  const sliderJugadores = document.getElementById('filter-jugadores');
+  const inputTiempoMin  = document.getElementById('filter-tiempo-min');
+  const inputTiempoMax  = document.getElementById('filter-tiempo-max');
+
+  sliderJugadores.addEventListener('input', () => {
+    const v = parseInt(sliderJugadores.value);
+    document.getElementById('val-jugadores').textContent = v === 0 ? 'Cualquiera' : v + ' jugadores';
+    actualizarFiltros();
+  });
+
+  function actualizarLabelTiempo() {
+    const mn = inputTiempoMin.value;
+    const mx = inputTiempoMax.value;
+    if (!mn && !mx) document.getElementById('val-tiempo').textContent = 'Cualquiera';
+    else if (mn && !mx) document.getElementById('val-tiempo').textContent = `≥ ${mn} min`;
+    else if (!mn && mx) document.getElementById('val-tiempo').textContent = `≤ ${mx} min`;
+    else document.getElementById('val-tiempo').textContent = `${mn}–${mx} min`;
+  }
+
+  inputTiempoMin.addEventListener('input', () => { actualizarLabelTiempo(); actualizarFiltros(); });
+  inputTiempoMax.addEventListener('input', () => { actualizarLabelTiempo(); actualizarFiltros(); });
+
+  document.getElementById('check-todas').addEventListener('change', (e) => {
+    document.querySelectorAll('.check-complejidad').forEach(cb => cb.checked = false);
+    actualizarFiltros();
+  });
+
+  document.querySelectorAll('.check-complejidad').forEach(cb => {
+    cb.addEventListener('change', () => {
+      document.getElementById('check-todas').checked = false;
+      actualizarFiltros();
+    });
+  });
+
+  function getComplejidadSeleccionada() {
+    if (document.getElementById('check-todas').checked) return 'Todas';
+    const seleccionadas = [...document.querySelectorAll('.check-complejidad:checked')].map(cb => cb.value);
+    return seleccionadas.length === 1 ? seleccionadas[0] : 'Todas';
+  }
+
+  function actualizarFiltros() {
+    const jug  = parseInt(sliderJugadores.value);
+    const tmin = inputTiempoMin.value ? parseInt(inputTiempoMin.value) : null;
+    const tmax = inputTiempoMax.value ? parseInt(inputTiempoMax.value) : null;
+    const comp = getComplejidadSeleccionada();
+    anguloActual = 0;
+    document.getElementById('resultado-card').classList.add('hidden');
+    document.getElementById('empty-wheel').classList.add('hidden');
+    cargarJuegos(jug, tmin, tmax, comp, true);
+  }
+
+  function resetFiltros() {
+    sliderJugadores.value = 0;
+    inputTiempoMin.value = '';
+    inputTiempoMax.value = '';
+    document.getElementById('val-jugadores').textContent = 'Cualquiera';
+    document.getElementById('val-tiempo').textContent = 'Cualquiera';
+    document.getElementById('check-todas').checked = true;
+    document.querySelectorAll('.check-complejidad').forEach(cb => cb.checked = false);
+    anguloActual = 0;
+    document.getElementById('resultado-card').classList.add('hidden');
+    document.getElementById('empty-wheel').classList.add('hidden');
+    cargarJuegos(0, null, null, 'Todas', false);
+  }
+</script>
+{% endblock %}

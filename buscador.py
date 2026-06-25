@@ -16,17 +16,20 @@ class BuscadorLudoteca:
         # 4. Generamos los embeddings de todos los juegos
         self.embeddings_juegos = self.model.encode(self.textos_indexar, convert_to_tensor=True)
 
-    def buscar_juegos(self, consulta_usuario, num_jugadores=None, top_k=3):
-        # 1. Aplicamos filtro duro por número de jugadores si se especifica
+    def buscar_juegos(self, consulta_usuario, num_jugadores=None, complejidad=None, top_k=3):
+        # 1. Aplicamos filtros duros
         df_filtrado = self.df
         indices_validos = list(range(len(self.df)))
-        
+
         if num_jugadores is not None:
-            # Filtramos donde el número de jugadores esté en el rango permitido por el juego
             filtro = (self.df['min jugadores'] <= num_jugadores) & (self.df['max jugadores'] >= num_jugadores)
             df_filtrado = self.df[filtro]
             indices_validos = df_filtrado.index.tolist()
-            
+
+        if complejidad and complejidad != "Todas":
+            df_filtrado = df_filtrado[df_filtrado['Nivel de complejidad'] == complejidad]
+            indices_validos = df_filtrado.index.tolist()
+
         if df_filtrado.empty:
             return []
 
