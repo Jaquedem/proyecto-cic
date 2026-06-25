@@ -76,36 +76,33 @@ def entrenar():
     print(f"\n📥 Cargando procesador de imágenes ({MODEL_BASE})...")
     extractor = AutoImageProcessor.from_pretrained(MODEL_BASE)
 
-    # Carga de imágenes
-    print("🖼️  Cargando imágenes...")
-    imagenes, labels = [], []
+    # Indexar rutas (no cargar pixels en RAM — HF Dataset no serializa numpy 3D bien)
+    print("🖼️  Indexando imágenes...")
+    rutas, labels = [], []
     for label in etiquetas:
         carpeta = Path(DATASET_DIR) / label
-        for img_path in carpeta.glob("*"):
+        for img_path in sorted(carpeta.glob("*")):
             if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png"]:
                 continue
-            try:
-                img = Image.open(img_path).convert("RGB").resize((IMG_SIZE, IMG_SIZE))
-                imagenes.append(np.array(img))
-                labels.append(label2id[label])
-            except Exception as e:
-                print(f"  ⚠️  Saltando {img_path.name}: {e}")
+            rutas.append(str(img_path))
+            labels.append(label2id[label])
 
-    if len(imagenes) == 0:
-        print("❌ No se pudieron cargar imágenes.")
+    if len(rutas) == 0:
+        print("❌ No se encontraron imágenes.")
         return
 
-    print(f"✅ {len(imagenes)} imágenes cargadas.")
+    print(f"✅ {len(rutas)} imágenes indexadas.")
 
     # División train/val 80-20
-    indices = list(range(len(imagenes)))
-    import random; random.shuffle(indices)
+    import random
+    indices = list(range(len(rutas)))
+    random.shuffle(indices)
     split = int(len(indices) * 0.8)
     train_idx, val_idx = indices[:split], indices[split:]
 
     def hacer_dataset(idx):
         return Dataset.from_dict({
-            "pixel_values": [imagenes[i] for i in idx],
+            "ruta": [rutas[i] for i in idx],
             "label": [labels[i] for i in idx],
         })
 
@@ -113,14 +110,13 @@ def entrenar():
     ds_val = hacer_dataset(val_idx)
 
     def preprocess(batch):
-        batch["pixel_values"] = [
-            extractor(images=img, return_tensors="pt")["pixel_values"][0]
-            for img in batch["pixel_values"]
-        ]
+        imgs = [Image.open(r).convert("RGB") for r in batch["ruta"]]
+        procesado = extractor(images=imgs, return_tensors="pt")
+        batch["pixel_values"] = [procesado["pixel_values"][i] for i in range(len(imgs))]
         return batch
 
-    ds_train = ds_train.map(preprocess, batched=True, batch_size=BATCH_SIZE)
-    ds_val   = ds_val.map(preprocess, batched=True, batch_size=BATCH_SIZE)
+    ds_train = ds_train.map(preprocess, batched=True, batch_size=BATCH_SIZE, remove_columns=["ruta"])
+    ds_val   = ds_val.map(preprocess, batched=True, batch_size=BATCH_SIZE, remove_columns=["ruta"])
     ds_train.set_format("torch", columns=["pixel_values", "label"])
     ds_val.set_format("torch", columns=["pixel_values", "label"])
 
