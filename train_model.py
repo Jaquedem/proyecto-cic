@@ -174,8 +174,8 @@ def entrenar():
 
         return {"accuracy": float(acc)}
 
-    # num_workers=4 en GPU (multiprocessing acelerado), 0 en CPU para evitar overhead
-    num_workers = 4 if use_gpu else 0
+    # num_workers=0 en Windows: spawn no hereda globals del proceso principal
+    num_workers = 0
 
     args = TrainingArguments(
         output_dir=OUTPUT_DIR,
