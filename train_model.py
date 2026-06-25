@@ -20,6 +20,7 @@ import random
 from pathlib import Path
 from collections import defaultdict
 
+
 DATASET_DIR = "./dataset"
 OUTPUT_DIR  = "./modelo_cv"
 MODEL_BASE  = "google/efficientnet-b4"
@@ -155,6 +156,7 @@ def entrenar():
         id2label=id2label,
         label2id=label2id,
         ignore_mismatched_sizes=True,
+        use_safetensors=True,   # evita pytorch_model.bin → no activa CVE-2025-32434
     )
 
     def compute_metrics(eval_pred):
