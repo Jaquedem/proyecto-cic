@@ -83,50 +83,7 @@ datos_ludoteca = {
         "reyes_dela_rosca.png", "four_field.png", "poker.png", "baraja_espanola.png",
         "conecta4.png", "catan.png", "survive_the_island.png", "rummy.png", "ajedrez.png",
         "turista.png", "serpientes_escaleras.png", "basta.png", "igloo_mania.png"
-    ],
-    "youtube": [
-        "https://www.youtube.com/results?search_query=love+letter+juego+de+mesa+como+se+juega",
-        "https://www.youtube.com/results?search_query=penguin+breaking+ice+como+se+juega",
-        "https://www.youtube.com/results?search_query=ka+blab+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=carcassonne+juego+de+mesa+como+se+juega",
-        "https://www.youtube.com/results?search_query=doodle+dice+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=deep+dreams+juego+de+mesa+como+se+juega",
-        "https://www.youtube.com/results?search_query=uno+showem+no+mercy+como+se+juega",
-        "https://www.youtube.com/results?search_query=uno+juego+de+cartas+como+se+juega",
-        "https://www.youtube.com/results?search_query=hive+juego+de+mesa+como+se+juega",
-        "https://www.youtube.com/results?search_query=virus+juego+de+cartas+como+se+juega",
-        "https://www.youtube.com/results?search_query=virus+2+juego+expansion+como+se+juega",
-        "https://www.youtube.com/results?search_query=unstable+unicorns+como+se+juega",
-        "https://www.youtube.com/results?search_query=tides+of+madness+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=the+fox+in+the+forest+como+se+juega",
-        "https://www.youtube.com/results?search_query=fantasma+blitz+como+se+juega",
-        "https://www.youtube.com/results?search_query=exploding+kittens+como+se+juega",
-        "https://www.youtube.com/results?search_query=codigo+secreto+juego+de+mesa+como+se+juega",
-        "https://www.youtube.com/results?search_query=taco+gato+cabra+queso+pizza+como+se+juega",
-        "https://www.youtube.com/results?search_query=polilla+tramposa+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=feria+de+las+pulgas+titirilquen+juego",
-        "https://www.youtube.com/results?search_query=domino+como+se+juega+reglas",
-        "https://www.youtube.com/results?search_query=clues+express+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=deep+sea+adventure+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=spot+it+dobble+como+se+juega",
-        "https://www.youtube.com/results?search_query=spot+it+gone+camping+como+se+juega",
-        "https://www.youtube.com/results?search_query=star+realms+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=happy+little+dinosaurs+como+se+juega",
-        "https://www.youtube.com/results?search_query=reyes+de+la+rosca+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=four+field+kono+juego+abstracto",
-        "https://www.youtube.com/results?search_query=poker+reglas+como+se+juega",
-        "https://www.youtube.com/results?search_query=baraja+espanola+juegos+como+se+juega",
-        "https://www.youtube.com/results?search_query=conecta+4+como+se+juega",
-        "https://www.youtube.com/results?search_query=catan+juego+de+mesa+como+se+juega",
-        "https://www.youtube.com/results?search_query=survive+escape+from+atlantis+como+se+juega",
-        "https://www.youtube.com/results?search_query=rummy+juego+de+mesa+como+se+juega",
-        "https://www.youtube.com/results?search_query=ajedrez+como+se+juega+para+principiantes",
-        "https://www.youtube.com/results?search_query=turista+mundial+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=serpientes+y+escaleras+como+se+juega",
-        "https://www.youtube.com/results?search_query=basta+stop+juego+como+se+juega",
-        "https://www.youtube.com/results?search_query=igloo+mania+juego+como+se+juega"
-    ]
-}
+    ]}
 
 df = pd.DataFrame(datos_ludoteca)
 df.to_csv("coleccion_juegos.csv", index=False)

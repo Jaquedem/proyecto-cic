@@ -47,7 +47,6 @@ def get_info_juego(nombre: str) -> dict | None:
         "Max": int(row["max jugadores"]),
         "Tiempo": int(row["Tiempo de juego (min)"]),
         "Foto": row.get("foto", ""),
-        "Youtube": row.get("youtube", ""),
     }
 
 

@@ -451,10 +451,6 @@
          <div class="resultado-game-placeholder" style="display:none">🎲</div>`
       : `<div class="resultado-game-placeholder">🎲</div>`;
 
-    const youtubeHTML = juego.youtube
-      ? `<a href="${juego.youtube}" target="_blank" class="btn-youtube">▶ Ver cómo se juega</a>`
-      : '';
-
     document.getElementById('resultado-card').innerHTML = `
       ${fotoHTML}
       <div class="resultado-name">🎉 ${juego['Nombre del juego']}</div>
@@ -464,7 +460,6 @@
         <span class="tag">⏱ ${juego['Tiempo de juego (min)']} min</span>
       </div>
       <p class="resultado-premisa">${juego['Premisa del juego']}</p>
-      ${youtubeHTML}
     `;
     document.getElementById('resultado-card').classList.remove('hidden');
   }

@@ -317,7 +317,6 @@
             <p id="result-premisa" style="font-size:0.88rem;color:var(--texto-claro);line-height:1.55"></p>
           </div>
         </div>
-        <div id="result-youtube" style="margin-bottom:14px"></div>
       </div>
 
       <div id="instructions-card" class="instructions-card" style="display:none">
@@ -487,12 +486,6 @@
       : '';
 
     document.getElementById('result-premisa').textContent = info.Premisa || '';
-
-    // YouTube
-    const ytEl = document.getElementById('result-youtube');
-    ytEl.innerHTML = info.Youtube
-      ? `<a href="${info.Youtube}" target="_blank" class="btn-youtube">▶ Ver cómo se juega en YouTube</a>`
-      : '';
 
     document.getElementById('result-game-card').classList.remove('hidden');
 

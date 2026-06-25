@@ -55,7 +55,6 @@ class BuscadorLudoteca:
                 "Max": int(fila["max jugadores"]),
                 "Tiempo": int(fila["Tiempo de juego (min)"]),
                 "Foto": fila.get("foto", ""),
-                "Youtube": fila.get("youtube", ""),
                 "Similitud": f"{score.item():.2f}",
             })
             

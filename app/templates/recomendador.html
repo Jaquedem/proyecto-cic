@@ -139,26 +139,6 @@
     white-space: nowrap;
   }
 
-  .btn-youtube {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: #ff0000;
-    color: white;
-    border-radius: 50px;
-    padding: 5px 14px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: var(--transicion);
-    margin-top: 8px;
-  }
-
-  .btn-youtube:hover {
-    background: #cc0000;
-    transform: translateY(-1px);
-  }
-
   .empty-state {
     text-align: center;
     padding: 60px 24px;
@@ -260,11 +240,6 @@
               <span class="score-text">{{ (juego.Similitud | float * 100) | int }}%</span>
             </div>
 
-            {% if juego.Youtube %}
-            <a href="{{ juego.Youtube }}" target="_blank" class="btn-youtube">
-              ▶ Ver cómo se juega
-            </a>
-            {% endif %}
           </div>
         </div>
         {% endfor %}

@@ -48,5 +48,5 @@ async def filtrar_juegos(
         df = df[df["Nivel de complejidad"] == complejidad]
 
     juegos = df[["Nombre del juego", "Nivel de complejidad", "Tiempo de juego (min)",
-                 "min jugadores", "max jugadores", "Premisa del juego", "foto", "youtube"]].to_dict(orient="records")
+                 "min jugadores", "max jugadores", "Premisa del juego", "foto"]].to_dict(orient="records")
     return {"juegos": juegos, "total": len(juegos)}
