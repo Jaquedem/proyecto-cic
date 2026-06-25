@@ -21,8 +21,7 @@ def get_buscador() -> BuscadorLudoteca:
 
 @router.get("/", response_class=HTMLResponse)
 async def recomendador_page(request: Request):
-    return templates.TemplateResponse("recomendador.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "recomendador.html", {
         "resultados": [],
         "consulta": "",
         "buscando": False,
@@ -41,8 +40,7 @@ async def buscar(
         num_jugadores=num_jugadores if num_jugadores and num_jugadores > 0 else None,
         top_k=4,
     )
-    return templates.TemplateResponse("recomendador.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "recomendador.html", {
         "resultados": resultados,
         "consulta": consulta,
         "num_jugadores": num_jugadores,

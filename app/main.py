@@ -24,4 +24,4 @@ async def home(request: Request):
     total = 0
     if os.path.exists(CSV_PATH):
         total = len(pd.read_csv(CSV_PATH))
-    return templates.TemplateResponse("index.html", {"request": request, "total_juegos": total})
+    return templates.TemplateResponse(request, "index.html", {"total_juegos": total})

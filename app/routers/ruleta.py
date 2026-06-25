@@ -21,8 +21,7 @@ async def ruleta_page(request: Request):
     complejidades = sorted(df["Nivel de complejidad"].unique().tolist())
     max_tiempo = int(df["Tiempo de juego (min)"].max())
     max_jugadores = int(df["max jugadores"].max())
-    return templates.TemplateResponse("ruleta.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "ruleta.html", {
         "complejidades": complejidades,
         "max_tiempo": max_tiempo,
         "max_jugadores": max_jugadores,

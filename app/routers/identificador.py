@@ -68,8 +68,7 @@ def get_info_juego(nombre: str) -> dict | None:
 @router.get("/", response_class=HTMLResponse)
 async def identificador_page(request: Request):
     modelo_listo = os.path.exists(MODEL_PATH) and any(os.scandir(MODEL_PATH))
-    return templates.TemplateResponse("identificador.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "identificador.html", {
         "modelo_listo": modelo_listo,
     })
 
