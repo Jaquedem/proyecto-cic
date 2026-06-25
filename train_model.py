@@ -46,9 +46,8 @@ class GameDataset:
         return len(self.indices)
 
     def __getitem__(self, i):
-        from PIL import Image
         idx = self.indices[i]
-        img = Image.open(_rutas[idx]).convert("RGB")
+        img = _rutas[idx].copy()  # copia para no mutar la imagen en RAM
         if self.augment and _aug is not None:
             img = _aug(img)
         pv = _extractor(images=img, return_tensors="pt")["pixel_values"][0]
@@ -116,21 +115,26 @@ def entrenar():
         transforms.RandomGrayscale(p=0.05),
     ])
 
-    # Indexar rutas
-    print("🖼️  Indexando imágenes...")
+    # Pre-cargar todas las imágenes en RAM (270 imgs ≈ 80MB — evita I/O de disco en cada step)
+    print("🖼️  Cargando imágenes en memoria...")
     for label in etiquetas:
         carpeta = Path(DATASET_DIR) / label
         for img_path in sorted(carpeta.glob("*")):
             if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png"]:
                 continue
-            _rutas.append(str(img_path))
-            _labels.append(label2id[label])
+            try:
+                img = Image.open(img_path).convert("RGB")
+                img.load()  # fuerza descompresión en RAM ahora
+                _rutas.append(img)
+                _labels.append(label2id[label])
+            except Exception as e:
+                print(f"  ⚠️  Saltando {img_path.name}: {e}")
 
     if not _rutas:
         print("❌ No se encontraron imágenes.")
         return
 
-    print(f"✅ {len(_rutas)} imágenes indexadas.")
+    print(f"✅ {len(_rutas)} imágenes en memoria.")
 
     # División estratificada 80-20
     por_clase = defaultdict(list)
