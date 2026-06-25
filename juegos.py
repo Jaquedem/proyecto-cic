@@ -1,0 +1,71 @@
+import pandas as pd
+
+# Creamos el diccionario con los datos corregidos de tu colección
+datos_ludoteca = {
+    "Nombre del juego": [
+        "Love letter", "Penguin Breaking Ice", "Ka-Blab!", "Carcassonne", "doodle dice", 
+        "Deep Dreams", "UNO show'em no mercy", "UNO", "Hive", "Virus", "Virus 2", 
+        "Unstable unicorns", "Tides of madness", "The fox in the forest", "Fantasma blitz", 
+        "Exploding kittens", "Código secreto", "Taco Gato Cabra Queso Pizza", "Polilla tramposa", 
+        "La feria de las pulgas de Titirilquén", "Domino", "Clues express", "Deep Sea", 
+        "Spot it! Classic", "Spot it! Gone Camping", "Star Realms", "Happy Little Dinosaurs", 
+        "Reyes de la Rosca", "Four field cone", "Poker", "Baraja Española", "Conecta 4", 
+        "Catan", "Survive the Island", "Rummy", "Ajedrez", "Turista mundial", 
+        "Serpientes y escaleras", "¡Basta!", "Igloo mania"
+    ],
+    "Nivel de complejidad": [
+        "Bajo", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Medio", "Bajo", 
+        "Bajo", "Medio", "Medio", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo", 
+        "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Medio", 
+        "Varía", "Bajo", "Alto", "Medio", "Medio", "Alto", "Bajo", "Bajo", "Bajo", "Bajo"
+    ],
+    "Premisa del juego": [
+        "Juego de deducción y riesgo donde intentas llevar una carta de amor a la princesa mientras eliminas las cartas de los rivales.",
+        "Destreza física; los jugadores se turnan para golpear bloques de hielo con un martillo intentando no tirar al pingüino.",
+        "Juego de palabras a contrarreloj con un temporizador que simula una bomba; debes decir elementos de una categoría antes de que explote.",
+        "Estrategia de colocación de losetas donde los jugadores construyen ciudades, caminos y monasterios de la Francia medieval para sumar puntos.",
+        "Juego de dados en el que se lanzan para conseguir combinaciones que coincidan con los dibujos de las cartas y así coleccionarlas.",
+        "Los jugadores son guardianes que guían al pequeño Bruno en su cama por el mundo onírico; se conectan cartas asociando bloques de color y alineando flechas blancas para trazar un camino continuo y reparador sin despertarlo.",
+        "Una versión brutalmente competitiva del UNO clásico, con penalizaciones despiadadas, cartas de +10 y eliminación directa si acumulas cartas.",
+        "El clásico juego de cartas donde debes deshacerte de tu mano haciendo coincidir colores o números, saboteando a los demás.",
+        "Juego abstracto para dos jugadores (sin tablero) donde usas insectos con movimientos únicos para rodear a la reina rival; requiere mucha estrategia.",
+        "Juego de cartas rápido donde compites por aislar un cuerpo sano mientras infectas y destruyes los órganos de tus oponentes.",
+        "Expansión que añade nuevos virus mutados, medicinas experimentales y vacunas, elevando muy ligeramente la toma de decisiones.",
+        "Estrategia de cartas donde construyes un ejército de unicornios en tu establo mientras traicionas y destruyes los avances de tus amigos con efectos de cartas.",
+        "Juego de cartas para dos basado en los mitos de Cthulhu; debes equilibrar la puntuación de mayorías con el nivel de locura que acumulas.",
+        "Juego de bazas para dos personas donde las cartas tienen habilidades mágicas; ganar demasiadas bazas te convierte en el villano y pierdes puntos.",
+        "Juego de reflejos y agudeza visual donde debes ser el más rápido en atrapar el objeto correcto según las combinaciones de la carta revelada.",
+        "Una ruleta rusa estratégica con gatitos; los jugadores roban cartas hasta que a alguien le sale un gato explosivo y queda eliminado, a menos que lo desactive.",
+        "Dos jefes de espías dan pistas de una sola palabra para que sus equipos descubran a sus agentes secretos en un tablero de palabras sin topar al asesino.",
+        "Locura de reflejos; se van diciendo las palabras en orden y si la carta coincide con lo que dices, todos deben palmear el centro. El último acumula cartas.",
+        "Juego de cartas familiar donde el objetivo es deshacerte de tu mano... ¡incluso haciendo trampas escondiendo cartas!, cuidándote del Guardián.",
+        "Juego infantil de mesa (temático de 31 Minutos); los jugadores compiten en dinámicas de feria muy sencillas para conseguir objetos y puntos.",
+        "Clásico juego de mesa donde se colocan fichas numeradas haciendo coincidir los extremos, buscando quedarse sin fichas o bloquear al rival.",
+        "Versión rápida y simplificada del juego de deducción de crímenes; se lanzan dados y se descartan sospechosos de forma ágil.",
+        "Buscadores de tesoros submarinos que comparten el mismo tanque de oxígeno; si eres muy codicioso, todos mueren. Reglas simples, pero con tensión psicológica.",
+        "Agudeza visual; juego de cartas donde siempre hay un único símbolo idéntico entre dos cartas cualesquiera, y debes ser el primero en encontrarlo.",
+        "Variación del Spot it! clásico con ilustraciones orientadas a campamentos, naturaleza y herramientas de supervivencia al aire libre.",
+        "Juego de construcción de mazos (deckbuilding) de combate espacial; compras naves y bases para destruir la autoridad de tu oponente combinando efectos.",
+        "Intentas esquivar desastres naturales, de salud o emocionales para que tu dinosaurio sobreviva mientras saboteas a los demás para que se extingan con cartas sencillas.",
+        "Juego de cartas rápido y de azar mexicano donde se compite por obtener los mejores pedazos de Rosca de Reyes esquivando sacar el 'monito'.",
+        "Movimiento abstracto tradicional donde intentas bloquear o alinear piezas en un pequeño cuadrante. Reglas minimalistas.",
+        "Juego de apuestas y cartas; las reglas de las manos son sencillas, pero dominar la psicología, apuestas y faroles (bluffing) requiere práctica.",
+        "Set de cartas tradicional multiusos. La complejidad depende enteramente del juego elegido (un Conquián o Brisca es Medio, mientras que una Escoba es Bajo).",
+        "Juego de estrategia vertical en el que dejas caer fichas en una rejilla con el objetivo de alinear cuatro de tu color antes que tu rival.",
+        "Gestión de recursos e intercambio; los jugadores colonizan una isla construyendo pueblos, rutas y negociando materias primas. Tiene múltiples reglas de comercio y desarrollo.",
+        "Los jugadores intentan evacuar a sus exploradores de una isla que se hunde, moviendo barcos y esquivando monstruos marinos activados por turnos.",
+        "Clásico juego de mesa (con fichas o cartas) donde combinas secuencias numéricas o grupos del mismo valor; requiere atención para acomodar combinaciones largas.",
+        "Juego de estrategia pura en tablero. Aprender el movimiento de las piezas es sencillo, pero la profundidad táctica y anticipación de jugadas es muy alta.",
+        "Juego de tablero clásico de finanzas basado principalmente en los dados, donde compras países, construyes hoteles y cobras renta a los rivales.",
+        "Juego infantil de recorrido basado puramente en el azar de los dados; no requiere ninguna toma de decisiones.",
+        "Juego de agilidad mental y vocabulario; se elige una letra al azar y se completan categorías (Nombre, Flor, Fruto) antes de que alguien detenga el tiempo.",
+        "Juego de habilidad física donde los jugadores retiran bloques de hielo de un iglú usando un gancho, intentando que la estructura no colapse."
+    ],
+    "Tiempo de juego (min)": [20, 15, 20, 35, 30, 15, 25, 20, 15, 20, 20, 35, 20, 30, 25, 15, 15, 10, 20, 30, 20, 15, 30, 15, 15, 30, 40, 20, 10, 20, 20, 10, 75, 45, 30, 30, 50, 20, 15, 15],
+    "min jugadores": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2],
+    "max jugadores": [6, 4, 6, 5, 6, 5, 6, 10, 2, 6, 6, 8, 2, 2, 8, 5, 8, 8, 5, 10, 4, 4, 6, 8, 8, 4, 4, 6, 2, 10, 10, 2, 4, 5, 4, 2, 6, 6, 8, 4]
+}
+
+df = pd.DataFrame(datos_ludoteca)
+df.to_csv("coleccion_juegos.csv", index=False)
+print("¡Tabla guardada exitosamente como 'coleccion_juegos.csv'!")
