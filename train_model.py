@@ -5,7 +5,6 @@ Estructura esperada del dataset:
     dataset/
         Love letter/
             foto1.jpg
-            foto2.jpg
             ...
         (una carpeta por juego, nombre = nombre del juego)
 
@@ -19,13 +18,40 @@ import os
 import json
 import random
 from pathlib import Path
+from collections import defaultdict
 
 DATASET_DIR = "./dataset"
 OUTPUT_DIR  = "./modelo_cv"
-MODEL_BASE  = "google/efficientnet-b4"   # b0→b4: más capacidad, 8GB VRAM lo maneja bien
+MODEL_BASE  = "google/efficientnet-b4"
 NUM_EPOCHS  = 25
 BATCH_SIZE  = 32
 LEARNING_RATE = 1e-4
+
+# Estas variables se rellenan en entrenar() y son necesarias a nivel de módulo
+# para que GameDataset sea picklable en Windows (multiprocessing spawn)
+_rutas    = []
+_labels   = []
+_extractor = None
+_aug       = None
+
+
+# Nivel de módulo — requerido por Windows multiprocessing para poder pickle la clase
+class GameDataset:
+    def __init__(self, indices, augment=False):
+        self.indices = indices
+        self.augment = augment
+
+    def __len__(self):
+        return len(self.indices)
+
+    def __getitem__(self, i):
+        from PIL import Image
+        idx = self.indices[i]
+        img = Image.open(_rutas[idx]).convert("RGB")
+        if self.augment and _aug is not None:
+            img = _aug(img)
+        pv = _extractor(images=img, return_tensors="pt")["pixel_values"][0]
+        return {"pixel_values": pv, "labels": _labels[idx]}
 
 
 def verificar_dataset():
@@ -50,21 +76,24 @@ def verificar_dataset():
 
 
 def entrenar():
+    global _rutas, _labels, _extractor, _aug
+
     try:
         import torch
         from torchvision import transforms
         from transformers import AutoImageProcessor, AutoModelForImageClassification, TrainingArguments, Trainer
-        from PIL import Image
         import numpy as np
-        use_gpu = torch.cuda.is_available()
-        if use_gpu:
-            print(f"🎮 GPU detectada: {torch.cuda.get_device_name(0)} ({torch.cuda.get_device_properties(0).total_memory // 1024**2} MB)")
-        else:
-            print("⚠️  No se detectó GPU, entrenando en CPU (más lento).")
     except ImportError as e:
         print(f"❌ Falta dependencia: {e}")
         print("   Instala con: pip install transformers accelerate torch torchvision Pillow")
         return
+
+    use_gpu = torch.cuda.is_available()
+    if use_gpu:
+        print(f"🎮 GPU detectada: {torch.cuda.get_device_name(0)} "
+              f"({torch.cuda.get_device_properties(0).total_memory // 1024**2} MB)")
+    else:
+        print("⚠️  No se detectó GPU, entrenando en CPU (más lento).")
 
     print("🔍 Verificando dataset...")
     etiquetas = verificar_dataset()
@@ -72,32 +101,39 @@ def entrenar():
         return
 
     label2id = {label: i for i, label in enumerate(etiquetas)}
-    id2label = {i: label for i, label in enumerate(etiquetas)}
+    id2label  = {i: label for i, label in enumerate(etiquetas)}
 
     print(f"\n📥 Cargando procesador de imágenes ({MODEL_BASE})...")
-    extractor = AutoImageProcessor.from_pretrained(MODEL_BASE)
+    _extractor = AutoImageProcessor.from_pretrained(MODEL_BASE)
+
+    # Augmentation para entrenamiento
+    _aug = transforms.Compose([
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(degrees=20),
+        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.3, hue=0.05),
+        transforms.RandomPerspective(distortion_scale=0.2, p=0.4),
+        transforms.RandomGrayscale(p=0.05),
+    ])
 
     # Indexar rutas
     print("🖼️  Indexando imágenes...")
-    rutas, labels = [], []
     for label in etiquetas:
         carpeta = Path(DATASET_DIR) / label
         for img_path in sorted(carpeta.glob("*")):
             if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png"]:
                 continue
-            rutas.append(str(img_path))
-            labels.append(label2id[label])
+            _rutas.append(str(img_path))
+            _labels.append(label2id[label])
 
-    if not rutas:
+    if not _rutas:
         print("❌ No se encontraron imágenes.")
         return
 
-    print(f"✅ {len(rutas)} imágenes indexadas.")
+    print(f"✅ {len(_rutas)} imágenes indexadas.")
 
-    # División estratificada 80-20 (misma proporción por clase)
-    from collections import defaultdict
+    # División estratificada 80-20
     por_clase = defaultdict(list)
-    for idx, lbl in enumerate(labels):
+    for idx, lbl in enumerate(_labels):
         por_clase[lbl].append(idx)
 
     train_idx, val_idx = [], []
@@ -108,32 +144,6 @@ def entrenar():
         val_idx.extend(lbl_indices[split:])
 
     print(f"   Train: {len(train_idx)} | Val: {len(val_idx)}")
-
-    # Augmentation solo para entrenamiento
-    aug = transforms.Compose([
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(degrees=20),
-        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.3, hue=0.05),
-        transforms.RandomPerspective(distortion_scale=0.2, p=0.4),
-        transforms.RandomGrayscale(p=0.05),
-    ])
-
-    # Dataset dinámico — augmentation se aplica de nuevo cada época
-    class GameDataset(torch.utils.data.Dataset):
-        def __init__(self, indices, augment=False):
-            self.indices  = indices
-            self.augment  = augment
-
-        def __len__(self):
-            return len(self.indices)
-
-        def __getitem__(self, i):
-            idx = self.indices[i]
-            img = Image.open(rutas[idx]).convert("RGB")
-            if self.augment:
-                img = aug(img)
-            pv = extractor(images=img, return_tensors="pt")["pixel_values"][0]
-            return {"pixel_values": pv, "labels": labels[idx]}
 
     ds_train = GameDataset(train_idx, augment=True)
     ds_val   = GameDataset(val_idx,   augment=False)
@@ -152,19 +162,18 @@ def entrenar():
         preds = np.argmax(logits, axis=-1)
         acc = (preds == lbls).mean()
 
-        # Accuracy por clase
-        por_clase_acc = {}
-        for cls_id, cls_name in id2label.items():
+        print("\n  Accuracy por clase:")
+        for cls_id, cls_name in sorted(id2label.items()):
             mask = lbls == cls_id
             if mask.sum() > 0:
-                por_clase_acc[cls_name] = float((preds[mask] == lbls[mask]).mean())
-
-        print("\n  Accuracy por clase:")
-        for nombre, a in sorted(por_clase_acc.items()):
-            barra = "█" * int(a * 20)
-            print(f"    {nombre:<25} {barra:<20} {a*100:.0f}%")
+                a = float((preds[mask] == lbls[mask]).mean())
+                barra = "█" * int(a * 20)
+                print(f"    {cls_name:<25} {barra:<20} {a*100:.0f}%")
 
         return {"accuracy": float(acc)}
+
+    # num_workers=4 en GPU (multiprocessing acelerado), 0 en CPU para evitar overhead
+    num_workers = 4 if use_gpu else 0
 
     args = TrainingArguments(
         output_dir=OUTPUT_DIR,
@@ -176,11 +185,10 @@ def entrenar():
         save_strategy="epoch",
         load_best_model_at_end=True,
         metric_for_best_model="accuracy",
-        logging_dir=os.path.join(OUTPUT_DIR, "logs"),
         report_to="none",
-        dataloader_num_workers=4,
-        warmup_ratio=0.1,
-        fp16=use_gpu,           # float16 en GPU: doble velocidad, mitad de VRAM
+        dataloader_num_workers=num_workers,
+        warmup_steps=50,
+        fp16=use_gpu,
         dataloader_pin_memory=use_gpu,
     )
 
@@ -197,7 +205,7 @@ def entrenar():
 
     print("\n💾 Guardando modelo...")
     trainer.save_model(OUTPUT_DIR)
-    extractor.save_pretrained(OUTPUT_DIR)
+    _extractor.save_pretrained(OUTPUT_DIR)
 
     with open(os.path.join(OUTPUT_DIR, "labels.txt"), "w") as f:
         f.write("\n".join(etiquetas))
