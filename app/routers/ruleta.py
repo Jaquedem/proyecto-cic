@@ -32,6 +32,7 @@ async def ruleta_page(request: Request):
 @router.get("/filtrar", response_class=JSONResponse)
 async def filtrar_juegos(
     jugadores: int = None,
+    tiempo_min: int = None,
     tiempo_max: int = None,
     complejidad: str = None,
 ):
@@ -39,6 +40,9 @@ async def filtrar_juegos(
 
     if jugadores and jugadores > 0:
         df = df[(df["min jugadores"] <= jugadores) & (df["max jugadores"] >= jugadores)]
+
+    if tiempo_min and tiempo_min > 0:
+        df = df[df["Tiempo de juego (min)"] >= tiempo_min]
 
     if tiempo_max and tiempo_max > 0:
         df = df[df["Tiempo de juego (min)"] <= tiempo_max]

@@ -254,8 +254,15 @@
       </div>
 
       <div class="filter-block">
-        <label>⏱ Tiempo máximo: <span class="range-value" id="val-tiempo">Cualquiera</span></label>
-        <input type="range" id="filter-tiempo" min="0" max="{{ max_tiempo }}" value="0" step="5" />
+        <label>⏱ Rango de tiempo: <span class="range-value" id="val-tiempo">Cualquiera</span></label>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <input type="number" id="filter-tiempo-min" min="0" max="{{ max_tiempo }}" value=""
+            placeholder="min" style="width:64px;padding:5px 8px;border:2px solid var(--lila-claro);border-radius:10px;font-family:inherit;font-size:0.85rem;outline:none;" />
+          <span style="color:var(--texto-claro);font-size:0.85rem">—</span>
+          <input type="number" id="filter-tiempo-max" min="0" max="{{ max_tiempo }}" value=""
+            placeholder="max" style="width:64px;padding:5px 8px;border:2px solid var(--lila-claro);border-radius:10px;font-family:inherit;font-size:0.85rem;outline:none;" />
+          <span style="color:var(--texto-claro);font-size:0.82rem">min</span>
+        </div>
       </div>
 
       <div class="filter-block">
@@ -317,18 +324,21 @@
   const ctx = canvas.getContext('2d');
 
   // ---- Inicialización ----
-  cargarJuegos();
+  cargarJuegos(0, null, null, 'Todas', false);
 
   // ---- Carga y renderizado ----
-  async function cargarJuegos(jugadores=0, tiempoMax=0, complejidad='Todas') {
-    const params = new URLSearchParams({ jugadores, tiempo_max: tiempoMax, complejidad });
+  // showEmpty: mostrar mensaje vacío si no hay juegos (false en carga inicial)
+  async function cargarJuegos(jugadores=0, tiempoMin=null, tiempoMax=null, complejidad='Todas', showEmpty=true) {
+    const params = new URLSearchParams({ jugadores, complejidad });
+    if (tiempoMin) params.set('tiempo_min', tiempoMin);
+    if (tiempoMax) params.set('tiempo_max', tiempoMax);
     const res = await fetch(`/ruleta/filtrar?${params}`);
     const data = await res.json();
     juegos = data.juegos;
     document.getElementById('juegos-count').textContent = data.total;
 
     if (juegos.length === 0) {
-      document.getElementById('empty-wheel').classList.remove('hidden');
+      if (showEmpty) document.getElementById('empty-wheel').classList.remove('hidden');
       limpiarCanvas();
     } else {
       document.getElementById('empty-wheel').classList.add('hidden');
@@ -528,7 +538,8 @@
 
   // ---- Filtros ----
   const sliderJugadores = document.getElementById('filter-jugadores');
-  const sliderTiempo = document.getElementById('filter-tiempo');
+  const inputTiempoMin  = document.getElementById('filter-tiempo-min');
+  const inputTiempoMax  = document.getElementById('filter-tiempo-max');
 
   sliderJugadores.addEventListener('input', () => {
     const v = parseInt(sliderJugadores.value);
@@ -536,11 +547,17 @@
     actualizarFiltros();
   });
 
-  sliderTiempo.addEventListener('input', () => {
-    const v = parseInt(sliderTiempo.value);
-    document.getElementById('val-tiempo').textContent = v === 0 ? 'Cualquiera' : `≤ ${v} min`;
-    actualizarFiltros();
-  });
+  function actualizarLabelTiempo() {
+    const mn = inputTiempoMin.value;
+    const mx = inputTiempoMax.value;
+    if (!mn && !mx) document.getElementById('val-tiempo').textContent = 'Cualquiera';
+    else if (mn && !mx) document.getElementById('val-tiempo').textContent = `≥ ${mn} min`;
+    else if (!mn && mx) document.getElementById('val-tiempo').textContent = `≤ ${mx} min`;
+    else document.getElementById('val-tiempo').textContent = `${mn}–${mx} min`;
+  }
+
+  inputTiempoMin.addEventListener('input', () => { actualizarLabelTiempo(); actualizarFiltros(); });
+  inputTiempoMax.addEventListener('input', () => { actualizarLabelTiempo(); actualizarFiltros(); });
 
   document.getElementById('check-todas').addEventListener('change', (e) => {
     document.querySelectorAll('.check-complejidad').forEach(cb => cb.checked = false);
@@ -561,24 +578,28 @@
   }
 
   function actualizarFiltros() {
-    const jug = parseInt(sliderJugadores.value);
-    const tiempo = parseInt(sliderTiempo.value);
+    const jug  = parseInt(sliderJugadores.value);
+    const tmin = inputTiempoMin.value ? parseInt(inputTiempoMin.value) : null;
+    const tmax = inputTiempoMax.value ? parseInt(inputTiempoMax.value) : null;
     const comp = getComplejidadSeleccionada();
     anguloActual = 0;
     document.getElementById('resultado-card').classList.add('hidden');
-    cargarJuegos(jug, tiempo, comp);
+    document.getElementById('empty-wheel').classList.add('hidden');
+    cargarJuegos(jug, tmin, tmax, comp, true);
   }
 
   function resetFiltros() {
     sliderJugadores.value = 0;
-    sliderTiempo.value = 0;
+    inputTiempoMin.value = '';
+    inputTiempoMax.value = '';
     document.getElementById('val-jugadores').textContent = 'Cualquiera';
     document.getElementById('val-tiempo').textContent = 'Cualquiera';
     document.getElementById('check-todas').checked = true;
     document.querySelectorAll('.check-complejidad').forEach(cb => cb.checked = false);
     anguloActual = 0;
     document.getElementById('resultado-card').classList.add('hidden');
-    cargarJuegos();
+    document.getElementById('empty-wheel').classList.add('hidden');
+    cargarJuegos(0, null, null, 'Todas', false);
   }
 </script>
 {% endblock %}

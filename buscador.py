@@ -10,8 +10,18 @@ class BuscadorLudoteca:
         # 2. Cargamos el modelo desde la carpeta local (Modo Offline)
         self.model = SentenceTransformer('./modelo_local_e5')
         
-        # 3. Preparamos los textos para el modelo basados en la premisa
-        self.textos_indexar = [f"passage: {premisa}" for premisa in self.df["Premisa del juego"]]
+        # 3. Preparamos los textos con todos los campos relevantes del juego
+        # Incluir complejidad, duración y jugadores permite al modelo semántico
+        # entender consultas como "algo rápido", "de larga duración", "para muchos"
+        def texto_juego(row):
+            return (
+                f"passage: {row['Nombre del juego']}. "
+                f"Complejidad: {row['Nivel de complejidad']}. "
+                f"Jugadores: {row['min jugadores']} a {row['max jugadores']}. "
+                f"Duración: {row['Tiempo de juego (min)']} minutos. "
+                f"{row['Premisa del juego']}"
+            )
+        self.textos_indexar = [texto_juego(row) for _, row in self.df.iterrows()]
         
         # 4. Generamos los embeddings de todos los juegos
         self.embeddings_juegos = self.model.encode(self.textos_indexar, convert_to_tensor=True)
