@@ -1,22 +1,21 @@
 import pandas as pd
 
-# Creamos el diccionario con los datos corregidos de tu colección
 datos_ludoteca = {
     "Nombre del juego": [
-        "Love letter", "Penguin Breaking Ice", "Ka-Blab!", "Carcassonne", "doodle dice", 
-        "Deep Dreams", "UNO show'em no mercy", "UNO", "Hive", "Virus", "Virus 2", 
-        "Unstable unicorns", "Tides of madness", "The fox in the forest", "Fantasma blitz", 
-        "Exploding kittens", "Código secreto", "Taco Gato Cabra Queso Pizza", "Polilla tramposa", 
-        "La feria de las pulgas de Titirilquén", "Domino", "Clues express", "Deep Sea", 
-        "Spot it! Classic", "Spot it! Gone Camping", "Star Realms", "Happy Little Dinosaurs", 
-        "Reyes de la Rosca", "Four field cone", "Poker", "Baraja Española", "Conecta 4", 
-        "Catan", "Survive the Island", "Rummy", "Ajedrez", "Turista mundial", 
+        "Love letter", "Penguin Breaking Ice", "Ka-Blab!", "Carcassonne", "doodle dice",
+        "Deep Dreams", "UNO show'em no mercy", "UNO", "Hive", "Virus", "Virus 2",
+        "Unstable unicorns", "Tides of madness", "The fox in the forest", "Fantasma blitz",
+        "Exploding kittens", "Código secreto", "Taco Gato Cabra Queso Pizza", "Polilla tramposa",
+        "La feria de las pulgas de Titirilquén", "Domino", "Clues express", "Deep Sea",
+        "Spot it! Classic", "Spot it! Gone Camping", "Star Realms", "Happy Little Dinosaurs",
+        "Reyes de la Rosca", "Four field cone", "Poker", "Baraja Española", "Conecta 4",
+        "Catan", "Survive the Island", "Rummy", "Ajedrez", "Turista mundial",
         "Serpientes y escaleras", "¡Basta!", "Igloo mania"
     ],
     "Nivel de complejidad": [
-        "Bajo", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Medio", "Bajo", 
-        "Bajo", "Medio", "Medio", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo", 
-        "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Medio", 
+        "Bajo", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Medio", "Bajo",
+        "Bajo", "Medio", "Medio", "Medio", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo", "Bajo",
+        "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Medio", "Bajo", "Bajo", "Bajo", "Medio",
         "Varía", "Bajo", "Alto", "Medio", "Medio", "Alto", "Bajo", "Bajo", "Bajo", "Bajo"
     ],
     "Premisa del juego": [
@@ -61,10 +60,30 @@ datos_ludoteca = {
         "Juego de agilidad mental y vocabulario; se elige una letra al azar y se completan categorías (Nombre, Flor, Fruto) antes de que alguien detenga el tiempo.",
         "Juego de habilidad física donde los jugadores retiran bloques de hielo de un iglú usando un gancho, intentando que la estructura no colapse."
     ],
-    "Tiempo de juego (min)": [20, 15, 20, 35, 30, 15, 25, 20, 15, 20, 20, 35, 20, 30, 25, 15, 15, 10, 20, 30, 20, 15, 30, 15, 15, 30, 40, 20, 10, 20, 20, 10, 75, 45, 30, 30, 50, 20, 15, 15],
-    "min jugadores": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2],
-    "max jugadores": [6, 4, 6, 5, 6, 5, 6, 10, 2, 6, 6, 8, 2, 2, 8, 5, 8, 8, 5, 10, 4, 4, 6, 8, 8, 4, 4, 6, 2, 10, 10, 2, 4, 5, 4, 2, 6, 6, 8, 4]
-}
+    "Tiempo de juego (min)": [
+        20, 15, 20, 35, 30, 15, 25, 20, 15, 20, 20, 35, 20, 30, 25, 15, 15, 10, 20, 30,
+        20, 15, 30, 15, 15, 30, 40, 20, 10, 20, 20, 10, 75, 45, 30, 30, 50, 20, 15, 15
+    ],
+    "min jugadores": [
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3,
+        2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2
+    ],
+    "max jugadores": [
+        6, 4, 6, 5, 6, 5, 6, 10, 2, 6, 6, 8, 2, 2, 8, 5, 8, 8, 5, 10,
+        4, 4, 6, 8, 8, 4, 4, 6, 2, 10, 10, 2, 4, 5, 4, 2, 6, 6, 8, 4
+    ],
+    "foto": [
+        "love_letter.png", "penguin_breaking.png", "ka_blab.png", "carcassonne.png",
+        "doodle_dice.png", "deep_dreams.png", "uno_nomercy.png", "uno.png", "hive.png",
+        "virus.png", "virus_2.png", "unstable_unicorns.png", "tides_of_madness.png",
+        "thefox_inthe_forest.png", "fantasma_blitz.png", "exploding_kittens.png",
+        "codigo_secreto.png", "taco_gato_cabra.png", "polilla_tramposa.png", "pulgas_titirilquen.png",
+        "domino.png", "clue_express.png", "deep_sea.png", "spotit_classic.png",
+        "spotit_camping.png", "star_realms.png", "happy_little_dinosaurs.png",
+        "reyes_dela_rosca.png", "four_field.png", "poker.png", "baraja_espanola.png",
+        "conecta4.png", "catan.png", "survive_the_island.png", "rummy.png", "ajedrez.png",
+        "turista.png", "serpientes_escaleras.png", "basta.png", "igloo_mania.png"
+    ]}
 
 df = pd.DataFrame(datos_ludoteca)
 df.to_csv("coleccion_juegos.csv", index=False)

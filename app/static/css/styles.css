@@ -1,0 +1,309 @@
+/* ============================================
+   BOMBUNNY - Estilos globales
+   Paleta: lilas y pasteles tenues
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --lila-oscuro:   #9b7fc7;
+  --lila-medio:    #b89de0;
+  --lila-claro:    #d9ccf0;
+  --lila-palido:   #ede8f9;
+  --rosa-pastel:   #f5d0e8;
+  --menta-pastel:  #c8eee4;
+  --amarillo-pastel: #fdf3c8;
+  --azul-pastel:   #c8dff5;
+  --blanco-suave:  #faf8ff;
+  --texto-oscuro:  #3d2f5c;
+  --texto-medio:   #6b5b8a;
+  --texto-claro:   #9b8ab5;
+  --sombra:        0 4px 20px rgba(155, 127, 199, 0.18);
+  --sombra-hover:  0 8px 32px rgba(155, 127, 199, 0.32);
+  --radio:         18px;
+  --radio-sm:      10px;
+  --transicion:    all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(135deg, var(--lila-palido) 0%, var(--blanco-suave) 60%, var(--rosa-pastel) 100%);
+  min-height: 100vh;
+  color: var(--texto-oscuro);
+}
+
+/* ---- Navbar ---- */
+.navbar {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid var(--lila-claro);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--lila-oscuro);
+  letter-spacing: -0.5px;
+}
+
+.navbar-brand .logo-emoji {
+  font-size: 1.8rem;
+}
+
+.navbar-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.btn-home {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--lila-claro);
+  color: var(--texto-oscuro);
+  border: none;
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: var(--transicion);
+}
+
+.btn-home:hover {
+  background: var(--lila-medio);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* ---- Botones generales ---- */
+.btn-primary {
+  background: linear-gradient(135deg, var(--lila-oscuro), var(--lila-medio));
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 28px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transicion);
+  box-shadow: 0 4px 14px rgba(155, 127, 199, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-hover);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--lila-oscuro);
+  border: 2px solid var(--lila-claro);
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transicion);
+}
+
+.btn-secondary:hover {
+  border-color: var(--lila-oscuro);
+  background: var(--lila-palido);
+  transform: translateY(-1px);
+}
+
+/* ---- Cards ---- */
+.card {
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 24px;
+  transition: var(--transicion);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-hover);
+}
+
+/* ---- Badge de complejidad ---- */
+.badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.badge-bajo    { background: var(--menta-pastel); color: #2d6a58; }
+.badge-medio   { background: var(--amarillo-pastel); color: #7a6200; }
+.badge-alto    { background: var(--rosa-pastel); color: #8a2252; }
+.badge-varia   { background: var(--azul-pastel); color: #1a4a7a; }
+
+/* ---- Tag de jugadores / tiempo ---- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--lila-palido);
+  color: var(--texto-medio);
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* ---- Contenedor principal de página ---- */
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* ---- Título de sección ---- */
+.section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--lila-oscuro);
+  margin-bottom: 8px;
+}
+
+.section-subtitle {
+  color: var(--texto-claro);
+  font-size: 1rem;
+  margin-bottom: 32px;
+}
+
+/* ---- Input de búsqueda ---- */
+.search-wrapper {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.search-input {
+  flex: 1;
+  border: 2px solid var(--lila-claro);
+  border-radius: 50px;
+  padding: 14px 24px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: var(--texto-oscuro);
+  background: white;
+  outline: none;
+  transition: var(--transicion);
+}
+
+.search-input:focus {
+  border-color: var(--lila-oscuro);
+  box-shadow: 0 0 0 4px rgba(155, 127, 199, 0.12);
+}
+
+.search-input::placeholder {
+  color: var(--texto-claro);
+}
+
+/* ---- Foto portada juego ---- */
+.game-cover {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  border-radius: var(--radio-sm);
+  background: #ffffff;
+  flex-shrink: 0;
+  padding: 4px;
+}
+
+.game-cover-placeholder {
+  width: 90px;
+  height: 90px;
+  border-radius: var(--radio-sm);
+  background: linear-gradient(135deg, var(--lila-claro), var(--rosa-pastel));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+/* ---- Loader ---- */
+.loader {
+  width: 36px;
+  height: 36px;
+  border: 4px solid var(--lila-claro);
+  border-top-color: var(--lila-oscuro);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 40px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--lila-palido); }
+::-webkit-scrollbar-thumb { background: var(--lila-medio); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--lila-oscuro); }
+
+/* ---- Toast / notificación ---- */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--lila-oscuro);
+  color: white;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: var(--sombra-hover);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: var(--transicion);
+  z-index: 999;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  .page-container { padding: 24px 16px; }
+  .section-title { font-size: 1.5rem; }
+  .navbar { padding: 12px 16px; }
+}
+
+.hidden { display: none !important; }

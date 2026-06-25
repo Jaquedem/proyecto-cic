@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Bombunny 🐰💣 — Tu Ludoteca{% endblock %}
+
+{% block head_extra %}
+<style>
+  .hero {
+    text-align: center;
+    padding: 60px 24px 40px;
+  }
+
+  .hero-mascot {
+    font-size: 5rem;
+    margin-bottom: 16px;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .hero-mascot-img {
+    width: 170px;
+    height: 170px;
+    object-fit: contain;
+    margin-bottom: 16px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-12px); }
+  }
+
+  .hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--lila-oscuro);
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--texto-claro);
+    max-width: 480px;
+    margin: 0 auto 48px;
+    line-height: 1.6;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  .option-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
+    padding: 36px 28px;
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid transparent;
+    box-shadow: var(--sombra);
+    transition: var(--transicion);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: var(--transicion);
+    border-radius: 22px;
+  }
+
+  .option-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--sombra-hover);
+    border-color: var(--lila-claro);
+  }
+
+  .option-card:hover::before {
+    opacity: 1;
+  }
+
+  .option-card.card-recomienda::before { background: linear-gradient(135deg, rgba(184,157,224,0.08), rgba(245,208,232,0.12)); }
+  .option-card.card-ruleta::before    { background: linear-gradient(135deg, rgba(200,238,228,0.12), rgba(253,243,200,0.12)); }
+  .option-card.card-camara::before    { background: linear-gradient(135deg, rgba(200,223,245,0.12), rgba(217,204,240,0.12)); }
+
+  .option-icon {
+    font-size: 3.2rem;
+    line-height: 1;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+  }
+
+  .option-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--texto-oscuro);
+  }
+
+  .option-desc {
+    font-size: 0.93rem;
+    color: var(--texto-claro);
+    line-height: 1.55;
+    flex: 1;
+  }
+
+  .option-cta {
+    margin-top: auto;
+    display: inline-block;
+    background: var(--lila-palido);
+    color: var(--lila-oscuro);
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    transition: var(--transicion);
+  }
+
+  .option-card:hover .option-cta {
+    background: var(--lila-oscuro);
+    color: white;
+  }
+
+  .stats-bar {
+    text-align: center;
+    color: var(--texto-claro);
+    font-size: 0.9rem;
+    padding-bottom: 40px;
+  }
+
+  .stats-bar span {
+    color: var(--lila-oscuro);
+    font-weight: 700;
+  }
+
+  @media (max-width: 640px) {
+    .hero-title { font-size: 2.2rem; }
+    .hero-mascot { font-size: 3.5rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <img src="/static/img/mascota.png" alt="Bombunny mascot" class="hero-mascot-img" onerror="this.outerHTML='&lt;span class=&quot;hero-mascot&quot;&gt;🐰💣&lt;/span&gt;';" />
+  <h1 class="hero-title">¡Bienvenido a Bombunny!</h1>
+  <p class="hero-subtitle">
+    Tu ludoteca inteligente. Descubre el juego perfecto para cada momento, deja que la suerte decida o identifica tus juegos con la cámara.
+  </p>
+</div>
+
+<div class="options-grid">
+
+  <a href="/recomendador" class="option-card card-recomienda">
+    <span class="option-icon">🔍✨</span>
+    <div class="option-title">Recomiéndame un juego</div>
+    <div class="option-desc">
+      Cuéntanos qué tipo de juego buscas en lenguaje natural y nuestro motor semántico encontrará el perfecto para ti.
+    </div>
+    <span class="option-cta">¡Buscar! →</span>
+  </a>
+
+  <a href="/ruleta" class="option-card card-ruleta">
+    <span class="option-icon">🎡🎲</span>
+    <div class="option-title">Ruleta aleatoria</div>
+    <div class="option-desc">
+      Filtra por número de jugadores, tiempo y complejidad. ¡Haz girar la ruleta y deja que el destino decida!
+    </div>
+    <span class="option-cta">¡Girar! →</span>
+  </a>
+
+  <a href="/identificador" class="option-card card-camara">
+    <span class="option-icon">📷🎮</span>
+    <div class="option-title">¿Cómo se juega?</div>
+    <div class="option-desc">
+      Apunta la cámara a la caja de tu juego y Bombunny te explicará las reglas de forma divertida al instante.
+    </div>
+    <span class="option-cta">¡Identificar! →</span>
+  </a>
+
+</div>
+
+<div class="stats-bar">
+  <span>{{ total_juegos }}</span> juegos en la ludoteca y contando 🎲
+</div>
+{% endblock %}

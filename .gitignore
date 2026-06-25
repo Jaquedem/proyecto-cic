@@ -54,4 +54,6 @@ coverage.xml
 docs/_build/
 .env
 .venv
-modelo_local_e5
+modelo_local_e5/
+modelo_cv/
+dataset/
