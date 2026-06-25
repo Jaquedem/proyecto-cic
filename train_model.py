@@ -22,10 +22,10 @@ from pathlib import Path
 
 DATASET_DIR = "./dataset"
 OUTPUT_DIR  = "./modelo_cv"
-MODEL_BASE  = "google/efficientnet-b0"
-NUM_EPOCHS  = 20
-BATCH_SIZE  = 16
-LEARNING_RATE = 2e-4
+MODEL_BASE  = "google/efficientnet-b4"   # b0→b4: más capacidad, 8GB VRAM lo maneja bien
+NUM_EPOCHS  = 25
+BATCH_SIZE  = 32
+LEARNING_RATE = 1e-4
 
 
 def verificar_dataset():
@@ -56,6 +56,11 @@ def entrenar():
         from transformers import AutoImageProcessor, AutoModelForImageClassification, TrainingArguments, Trainer
         from PIL import Image
         import numpy as np
+        use_gpu = torch.cuda.is_available()
+        if use_gpu:
+            print(f"🎮 GPU detectada: {torch.cuda.get_device_name(0)} ({torch.cuda.get_device_properties(0).total_memory // 1024**2} MB)")
+        else:
+            print("⚠️  No se detectó GPU, entrenando en CPU (más lento).")
     except ImportError as e:
         print(f"❌ Falta dependencia: {e}")
         print("   Instala con: pip install transformers accelerate torch torchvision Pillow")
@@ -173,8 +178,10 @@ def entrenar():
         metric_for_best_model="accuracy",
         logging_dir=os.path.join(OUTPUT_DIR, "logs"),
         report_to="none",
-        dataloader_num_workers=0,
+        dataloader_num_workers=4,
         warmup_ratio=0.1,
+        fp16=use_gpu,           # float16 en GPU: doble velocidad, mitad de VRAM
+        dataloader_pin_memory=use_gpu,
     )
 
     trainer = Trainer(
