@@ -73,16 +73,16 @@ datos_ludoteca = {
         4, 4, 6, 8, 8, 4, 4, 6, 2, 10, 10, 2, 4, 5, 4, 2, 6, 6, 8, 4
     ],
     "foto": [
-        "love_letter.jpg", "penguin_breaking_ice.jpg", "ka_blab.jpg", "carcassonne.jpg",
-        "doodle_dice.jpg", "deep_dreams.jpg", "uno_showem.jpg", "uno.jpg", "hive.jpg",
-        "virus.jpg", "virus_2.jpg", "unstable_unicorns.jpg", "tides_of_madness.jpg",
-        "fox_in_the_forest.jpg", "fantasma_blitz.jpg", "exploding_kittens.jpg",
-        "codigo_secreto.jpg", "taco_gato.jpg", "polilla_tramposa.jpg", "feria_titirilquen.jpg",
-        "domino.jpg", "clues_express.jpg", "deep_sea.jpg", "spot_it_classic.jpg",
-        "spot_it_camping.jpg", "star_realms.jpg", "happy_little_dinosaurs.jpg",
-        "reyes_rosca.jpg", "four_field_cone.jpg", "poker.jpg", "baraja_espanola.jpg",
-        "conecta_4.jpg", "catan.jpg", "survive_island.jpg", "rummy.jpg", "ajedrez.jpg",
-        "turista_mundial.jpg", "serpientes_escaleras.jpg", "basta.jpg", "igloo_mania.jpg"
+        "love_letter.png", "penguin_breaking.png", "ka_blab.png", "carcassonne.png",
+        "doodle_dice.png", "deep_dreams.png", "uno_nomercy.png", "uno.png", "hive.png",
+        "virus.png", "virus_2.png", "unstable_unicorns.png", "tides_of_madness.png",
+        "thefox_inthe_forest.png", "fantasma_blitz.png", "exploding_kittens.png",
+        "codigo_secreto.png", "taco_gato_cabra.png", "polilla_tramposa.png", "pulgas_titirilquen.png",
+        "domino.png", "clue_express.png", "deep_sea.png", "spotit_classic.png",
+        "spotit_camping.png", "star_realms.png", "happy_little_dinosaurs.png",
+        "reyes_dela_rosca.png", "four_field.png", "poker.png", "baraja_espanola.png",
+        "conecta4.png", "catan.png", "survive_the_island.png", "rummy.png", "ajedrez.png",
+        "turista.png", "serpientes_escaleras.png", "basta.png", "igloo_mania.png"
     ],
     "youtube": [
         "https://www.youtube.com/results?search_query=love+letter+juego+de+mesa+como+se+juega",

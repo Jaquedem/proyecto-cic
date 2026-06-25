@@ -67,6 +67,12 @@ body {
   font-size: 1.8rem;
 }
 
+.navbar-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
 .btn-home {
   display: flex;
   align-items: center;
@@ -231,10 +237,11 @@ body {
 .game-cover {
   width: 90px;
   height: 90px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: var(--radio-sm);
-  background: var(--lila-palido);
+  background: #ffffff;
   flex-shrink: 0;
+  padding: 4px;
 }
 
 .game-cover-placeholder {
