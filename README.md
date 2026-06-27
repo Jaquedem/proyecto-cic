@@ -39,7 +39,9 @@ proyecto-cic/
 │   └── ...
 │
 ├── train_model.py                # Entrena EfficientNet-B4 con transfer learning sobre el dataset local
-├── eval_model.py                 # Evalúa el modelo entrenado: muestra accuracy por clase con barras visuales
+├── eval_model.py                 # Evaluación básica: accuracy por clase en terminal
+├── eval_modelo_cv.py             # Evaluación completa del modelo CV: métricas sklearn + 4 gráficas exportadas
+├── eval_buscador.py              # Evaluación del buscador semántico: Precision@K + 3 gráficas exportadas
 ├── capturar_dataset.py           # Script OpenCV para capturar fotos con la webcam y construir el dataset
 │
 ├── model.py                      # Descarga multilingual-e5-base de HuggingFace y lo guarda en modelo_local_e5/
@@ -102,7 +104,7 @@ La app queda disponible en `http://localhost:8000`.
 
 ---
 
-## Entrenamiento del modelo CV
+## Entrenamiento y evaluación del modelo CV
 
 ```bash
 # Capturar fotos con la webcam (50+ por clase recomendado)
@@ -111,11 +113,26 @@ python capturar_dataset.py
 # Entrenar el modelo
 python train_model.py
 
-# Evaluar resultados por clase
-python eval_model.py
+# Evaluación completa con métricas y gráficas
+python eval_modelo_cv.py
+
+# Evaluación del buscador semántico
+python eval_buscador.py
 ```
 
 El dataset debe tener la estructura `dataset/{nombre_clase}/foto_xxx.jpg`. El modelo se guarda en `modelo_cv/`.
+
+Los scripts de evaluación exportan las siguientes imágenes:
+
+| Archivo generado | Contenido |
+|---|---|
+| `eval_confusion_matrix.png` | Heatmap de la matriz de confusión del modelo CV |
+| `eval_accuracy_por_clase.png` | Accuracy por clase + variación entre clases (np.diff) |
+| `eval_metricas_por_clase.png` | Precisión, Sensibilidad y F1 agrupados por clase |
+| `eval_distribucion_confianza.png` | Distribución de confianza: aciertos vs errores |
+| `eval_buscador_scores.png` | Similitud coseno por consulta + caída de relevancia |
+| `eval_buscador_precision.png` | Precision@K por tipo de consulta semántica |
+| `eval_buscador_distribucion.png` | Distribución global de scores del modelo E5 |
 
 ---
 
